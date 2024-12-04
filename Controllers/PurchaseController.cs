@@ -3,6 +3,7 @@ using EmployeeManagement.Service;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using static CCMPreparation.Controllers.OrderController;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -208,7 +209,7 @@ namespace CCMPreparation.Controllers
                                     cus.Key.Year,
                                     cus.Key.Month,
                                     ListedAmts = string.Join(",", cus.Select(amt => amt.Amount).Order()),
-                                    MedianAmt = GetMedianAmt(cus.OrderBy(ord => ord.Amount))
+                                    MedianAmt = Helpers.GetMedianAmt(cus.OrderBy(ord => ord.Amount))
                                 })
                                 .TakeLast(3);
 
@@ -290,27 +291,274 @@ namespace CCMPreparation.Controllers
             }
         }
 
-
-
-        private static int GetMedianAmt(IOrderedEnumerable<Purchase> cus)
+        // GET /api/Purchase/GetLowestPurchasesMadeInDayOfWeekOfYear/month/01/year/2023/TimofDay/Afternoon
+        [HttpGet("GetTotalPurchasesMadeOnEachDaysOfYear/year/{year}")]
+        public ActionResult<IEnumerable<object>> GetTotalPurchasesMadeOnEachDaysOfYear(int year)
         {
-            if (!cus.Any())
-                return 0;
+            _logger.LogInformation("PurachesController:Method:GetTotalPurchasesMadeOnEachDaysOfYear called.");
+            try
+            {
+                var rawResult = _dbService.GetAllPurchase()
+                                .Where(pur => pur.PurchaseDate.Year == year)
+                                .GroupBy(group => group.PurchaseDate.DayOfWeek)
+                                .Select(record => new
+                                {
+                                    Day = record.Key,
+                                    Count = record.Count()
+                                });
 
-            var count = cus.Count();
+                if (rawResult.Any())
+                {
+                    return Ok(rawResult);
+                }
 
-            if (count / 2 != 0 && count % 2 == 0) //even
-            {
-                return ((cus.ElementAt((count / 2) - 1)).Amount +
-                         (cus.ElementAt(count / 2)).Amount) / 2;
+                return NotFound(new { message = "No data found for customer." });
             }
-            else if (count / 2 != 0 && count % 2 != 0) //odd
+            catch (Exception ex)
             {
-                return (cus.OrderBy(ord => ord.Amount).ElementAt((count / 2))).Amount;
+                _logger.LogError("PurachesController:Method:GetTotalPurchasesMadeOnEachDaysOfYear Error: {ex}", ex);
+
+                var json = JsonConvert.SerializeObject(ex);
+
+                return StatusCode(StatusCodes.Status500InternalServerError, json);
             }
-            else // for one element
+        }
+
+        // GET /api/Purchase/GetLowestPurchasesMadeInDayOfWeekOfYear/month/01/year/2023/TimofDay/Afternoon
+        [HttpGet("GetTotalPurchasesMadeOnEachDaysInLast3Months")]
+        public ActionResult<IEnumerable<object>> GetTotalPurchasesMadeOnEachDaysInLast3Months()
+        {
+            _logger.LogInformation("PurachesController:Method:GetTotalPurchasesMadeOnEachDaysInLast3Months called.");
+            try
             {
-                return cus.ElementAt(0).Amount;
+                var rawResult = _dbService.GetAllPurchase()
+                                .OrderBy(pur => pur.PurchaseDate.Month)
+                                .TakeLast(3)
+                                .GroupBy(group => group.PurchaseDate.DayOfWeek)
+                                .Select(record => new
+                                {
+                                    Day = record.Key,
+                                    Count = record.Count()
+                                });
+
+                if (rawResult.Any())
+                {
+                    return Ok(rawResult);
+                }
+
+                return NotFound(new { message = "No data found for customer." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("PurachesController:Method:GetTotalPurchasesMadeOnEachDaysInLast3Months Error: {ex}", ex);
+
+                var json = JsonConvert.SerializeObject(ex);
+
+                return StatusCode(StatusCodes.Status500InternalServerError, json);
+            }
+        }
+
+        // GET /api/Purchase/GetAveragePurchasesMadeOnEachDaysOfYear/year/2023
+        [HttpGet("GetAveragePurchasesMadeOnEachDaysOfYear/year/{year}")]
+        public ActionResult<IEnumerable<object>> GetAveragePurchasesMadeOnEachDaysOfYear(int year)
+        {
+            _logger.LogInformation("PurachesController:Method:GetAveragePurchasesMadeOnEachDaysOfYear called.");
+            try
+            {
+                var rawResult = _dbService.GetAllPurchase()
+                                .Where(pur => pur.PurchaseDate.Year == year)
+                                .GroupBy(group => group.PurchaseDate.DayOfWeek)
+                                .Select(record => new
+                                {
+                                    Day = record.Key,
+                                    Average = record.Average(avg => avg.Amount)
+                                });
+
+                if (rawResult.Any())
+                {
+                    return Ok(rawResult);
+                }
+
+                return NotFound(new { message = "No data found for customer." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("PurachesController:Method:GetAveragePurchasesMadeOnEachDaysOfYear Error: {ex}", ex);
+
+                var json = JsonConvert.SerializeObject(ex);
+
+                return StatusCode(StatusCodes.Status500InternalServerError, json);
+            }
+        }
+
+        // GET /api/Purchase/GetLowestPurchasesMadeInDayOfWeekOfYear/month/01/year/2023/TimofDay/Afternoon
+        [HttpGet("GetTotalPurchasesMadeOnWeekDaysOfYear/year/{year}")]
+        public ActionResult<IEnumerable<object>> GetTotalPurchasesMadeOnWeekDaysOfYear(int year)
+        {
+            _logger.LogInformation("PurachesController:Method:GetTotalPurchasesMadeOnWeekDaysOfYear called.");
+            try
+            {
+                var rawResult = _dbService.GetAllPurchase()
+                                .Where(pur => pur.PurchaseDate.Year == year &&
+                                 !(pur.PurchaseDate.DayOfWeek == DayOfWeek.Saturday || pur.PurchaseDate.DayOfWeek == DayOfWeek.Sunday))
+                                .Select(record => new
+                                {
+                                    amount = record.Amount,
+                                    orderTime = record.PurchaseDate,
+                                    customerId = record.CustomerId
+                                });
+
+                if (rawResult.Any())
+                {
+                    return Ok($"Total Purchase on WeekDays:{rawResult.Count()}");
+                    // return Ok(rawResult);
+
+                }
+
+                return NotFound(new { message = "No data found for customer." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("PurachesController:Method:GetTotalPurchasesMadeOnWeekDaysOfYear Error: {ex}", ex);
+
+                var json = JsonConvert.SerializeObject(ex);
+
+                return StatusCode(StatusCodes.Status500InternalServerError, json);
+            }
+        }
+
+
+        // GET /api/Purchae/GetTotalPurchasesMadeOnWeekendfYear/year/2023
+        [HttpGet("GetTotalPurchasesMadeOnWeekendfYear/year/{year}")]
+        public ActionResult<IEnumerable<object>> GetTotalPurchasesMadeOnWeekendfYear(int year)
+        {
+            _logger.LogInformation("PurachesController:Method:GetTotalPurchasesMadeOnWeekendfYear called.");
+            try
+            {
+                var rawResult = _dbService.GetAllPurchase()
+                                .Where(pur => pur.PurchaseDate.Year == year &&
+                                 (pur.PurchaseDate.DayOfWeek == DayOfWeek.Saturday || pur.PurchaseDate.DayOfWeek == DayOfWeek.Sunday))
+                                .Select(record => new
+                                {
+                                    amount = record.Amount,
+                                    orderTime = record.PurchaseDate,
+                                    customerId = record.CustomerId
+                                });
+
+                if (rawResult.Any())
+                {
+                    return Ok($"Total Purchase on Weekend:{rawResult.Count()}");
+                    //return Ok(rawResult);
+
+                }
+
+                return NotFound(new { message = "No data found for customer." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("PurachesController:Method:GetTotalPurchasesMadeOnWeekendfYear Error: {ex}", ex);
+
+                var json = JsonConvert.SerializeObject(ex);
+
+                return StatusCode(StatusCodes.Status500InternalServerError, json);
+            }
+        }
+
+        // GET /api/Purchase/GetHighestPurchasesMadeInDayOfWeekOfYear/month/01/year/2023/TimofDay/Afternoon
+        [HttpGet("GetHighestPurchasesMadeOnDayOfWeekOfYear/year/{year}")]
+        public ActionResult<IEnumerable<object>> GetHighestPurchasesMadeInDayOfWeekOfYear(int year)
+        {
+            _logger.LogInformation("PurachesController:Method:GetHighestPurchasesMadeInDayOfWeekOfYear called.");
+            try
+            {
+                var rawResult = _dbService.GetAllPurchase()
+                                .Where(ord => ord.PurchaseDate.Year == year)
+                                .GroupBy(group => group.PurchaseDate.DayOfWeek)
+                                .Select(result => new
+                                {
+                                    Day = result.Key,
+                                    PurchaseCount = result.Count()
+                                });
+
+                var finalResult = rawResult.Where(result => result.PurchaseCount == rawResult.Max(purcount => purcount.PurchaseCount));
+
+                if (finalResult.Any())
+                {
+                    return Ok(finalResult);
+                }
+
+                return NotFound(new { message = "No data found for customer." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("PurachesController:Method:GetHighestPurchasesMadeInDayOfWeekOfYear Error: {ex}", ex);
+
+                var json = JsonConvert.SerializeObject(ex);
+
+                return StatusCode(StatusCodes.Status500InternalServerError, json);
+            }
+        }
+
+        // GET /api/Purchase/GetLowestPurchasesMadeInDayOfWeekOfYear/month/01/year/2023/TimofDay/Afternoon
+        [HttpGet("GetLowestPurchasesMadeOnDayOfWeekOfYear/year/{year}")]
+        public ActionResult<IEnumerable<object>> GetLowestPurchasesMadeInDayOfWeekOfYear(int year)
+        {
+            _logger.LogInformation("PurachesController:Method:GetLowestPurchasesMadeInDayOfWeekOfYear called.");
+            try
+            {
+                var rawResult = _dbService.GetAllPurchase()
+                                .Where(ord => ord.PurchaseDate.Year == year)
+                                .GroupBy(group => group.PurchaseDate.DayOfWeek)
+                                .Select(result => new
+                                {
+                                    Day = result.Key,
+                                    PurchaseCount = result.Count()
+                                });
+
+                var finalResult = rawResult.Where(result => result.PurchaseCount == rawResult.Min(purcount => purcount.PurchaseCount));
+
+                if (finalResult.Any())
+                {
+                    return Ok(finalResult);
+                }
+
+                return NotFound(new { message = "No data found for customer." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("PurachesController:Method:GetLowestPurchasesMadeInDayOfWeekOfYear Error: {ex}", ex);
+
+                var json = JsonConvert.SerializeObject(ex);
+
+                return StatusCode(StatusCodes.Status500InternalServerError, json);
+            }
+        }
+
+        // GET /api/Purchase/GetTotalPurchasesMadeInMonthOfYear/month/01/year/2023/TimofDay/Afternoon
+        [HttpGet("GetTotalPurchasesMadeInMonthOfYear/month/{month}/year/{year}/TimofDay/{partOfDay}")]
+        public ActionResult<IEnumerable<object>> GetTotalPurchasesMadeInMonthOfYear(int month, int year, PartOfDay partOfDay)
+        {
+            _logger.LogInformation("PurachesController:Method:GetTotalPurchasesMadeInMonthOfYear called.");
+            try
+            {
+                var rawResult = _dbService.GetAllPurchase()
+                                .Where(pur => pur.PurchaseDate.Year == year && pur.PurchaseDate.Month == month && Helpers.GetTimeOftheDay(pur.PurchaseDate.TimeOfDay) == partOfDay)
+                                .Count();
+
+                if (rawResult > 0)
+                {
+                    return Ok($"Total Purchases= {rawResult}");
+                }
+
+                return NotFound(new { message = "No data found for customer." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("PurachesController:Method:GetTotalPurchasesMadeInMonthOfYear Error: {ex}", ex);
+
+                var json = JsonConvert.SerializeObject(ex);
+
+                return StatusCode(StatusCodes.Status500InternalServerError, json);
             }
         }
 

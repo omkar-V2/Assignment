@@ -1,7 +1,9 @@
-﻿using EmployeeManagement.Data;
+﻿using System.Security.Cryptography;
+using EmployeeManagement.Data;
 using EmployeeManagement.Service;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 using static CCMPreparation.Controllers.OrderController;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -34,14 +36,12 @@ namespace CCMPreparation.Controllers
         {
             return _dbService.GetAllOrder().Where(ord => ord.OrderNo == orderno);
         }
-
-
-
+         
         // GET /api/Order/Customer/2023
         [HttpGet("GetCustomerMadePurchaseInMonthOfYear/month/{month}/year/{year}/TimofDay/{partOfDay}")]
         public ActionResult<IEnumerable<object>> GetCustomerMadePurchasesInafternoonOfFirstMonthOfYear(int month, int year, PartOfDay partOfDay)
         {
-            _logger.LogInformation("PurachesController:Method:GetCustomerMadePurchasesInafternoonOfFirstMonthOfYear called.");
+            _logger.LogInformation("OrderController:Method:GetCustomerMadePurchasesInafternoonOfFirstMonthOfYear called.");
             try
             {
                 var rawResult = _dbService.GetAllOrder()
@@ -58,7 +58,7 @@ namespace CCMPreparation.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError("PurachesController:Method:GetCustomerMadePurchasesInafternoonOfFirstMonthOfYear Error: {ex}", ex);
+                _logger.LogError("OrderController:Method:GetCustomerMadePurchasesInafternoonOfFirstMonthOfYear Error: {ex}", ex);
 
                 var json = JsonConvert.SerializeObject(ex);
 
