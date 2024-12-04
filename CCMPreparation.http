@@ -1,0 +1,127 @@
+@CCMPreparation_HostAddress = https://localhost:44395
+
+GET {{CCMPreparation_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+POST {{CCMPreparation_HostAddress}}/weatherforecast/
+Accept: application/json
+Content-Type: application/json
+
+{
+    "cityName": "Brisbane",
+    "date": "19-Jun-2024",
+    "temperatureC": 8,
+    "summary": "windy"
+}
+
+
+### Get All Employee 
+GET {{CCMPreparation_HostAddress}}/api/Employee/
+Accept: application/json 
+
+### Get Employee by ID
+GET {{CCMPreparation_HostAddress}}/api/Employee/1
+Accept: application/json 
+
+### Search Employee by firstname
+GET {{CCMPreparation_HostAddress}}/api/Employee/Search?firstName=Sachin
+Accept: application/json 
+
+
+### Add Employee
+POST {{CCMPreparation_HostAddress}}/api/Employee/
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": 0,
+  "firstName": "string",
+  "lastName": "string",
+  "designation": "string",
+  "department": "string",
+  "gender": "string",
+  "maritalStatus": "string",
+  "email": "string",
+  "phoneNo": "string",
+  "mobileNo": "string",
+  "address": "string",
+  "state": "string",
+  "city": "string",
+  "postalCode": "string",
+  "country": "string"
+}
+
+
+### Update Employee
+PUT {{CCMPreparation_HostAddress}}/api/Employee/2
+Accept: application/json
+Content-Type: application/json
+
+{
+  "id": 0,
+  "firstName": "string",
+  "lastName": "string",
+  "designation": "string",
+  "department": "string",
+  "gender": "string",
+  "maritalStatus": "string",
+  "email": "string",
+  "phoneNo": "string",
+  "mobileNo": "string",
+  "address": "string",
+  "state": "string",
+  "city": "string",
+  "postalCode": "string",
+  "country": "string"
+}
+
+ 
+### Delete Employee
+Delete {{CCMPreparation_HostAddress}}/api/Employee/1
+Accept: application/json 
+
+
+### Get Order
+GET {{CCMPreparation_HostAddress}}/api/Order
+Accept:application/json
+Content-Type:application/json
+
+### Get Order By ID
+GET {{CCMPreparation_HostAddress}}/api/Order/O002
+Accept:application/json
+Content-Type:application/json
+
+  
+### Get Purchase
+GET {{CCMPreparation_HostAddress}}/api/Purchase
+Accept:application/json
+Content-Type:application/json
+
+  
+### Get Purchase By ID
+GET {{CCMPreparation_HostAddress}}/api/Purchase/C001
+Accept:application/json
+Content-Type:application/json
+
+### Get Customer Expenditure By year
+GET {{CCMPreparation_HostAddress}}/api/Purchase/year/2023
+Accept:application/json
+Content-Type:application/json
+
+### Get Top Customer With High Expenditure By month of year
+GET {{CCMPreparation_HostAddress}}/api/Purchase/month/2023
+Accept:application/json
+Content-Type:application/json
+
+
+### Get Sale
+GET {{CCMPreparation_HostAddress}}/api/Sale
+Accept:application/json
+Content-Type:application/json
+
+### Get Sale
+GET {{CCMPreparation_HostAddress}}/api/Sale/Laptop
+Accept:application/json
+Content-Type:application/json
+
