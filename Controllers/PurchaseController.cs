@@ -210,7 +210,7 @@ namespace CCMPreparation.Controllers
                                     ListedAmts = string.Join(",", cus.Select(amt => amt.Amount).Order()),
                                     MedianAmt = GetMedianAmt(cus.OrderBy(ord => ord.Amount))
                                 })
-                                .Take(3);
+                                .TakeLast(3);
 
                 if (rawResult.Any())
                 {
@@ -228,6 +228,69 @@ namespace CCMPreparation.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, json);
             }
         }
+
+        // GET /api/Purchase/Customer/C001
+        [HttpGet("GetCustomerMadePurchasesInLast6MonthOfYear/year/{year}")]
+        public ActionResult<IEnumerable<object>> GetCustomerMadePurchasesInLast6MonthOfYear(int year)
+        {
+            _logger.LogInformation("PurachesController:Method:GetCustomerMadePurchasesInLast6MonthOfYear called.");
+            try
+            {
+                var rawResult = _dbService.GetAllPurchase()
+                                .Where(pur => pur.PurchaseDate.Year == year)
+                                .OrderBy(month => month.PurchaseDate.Month)
+                                .TakeLast(6)
+                                .Select(cus => cus.CustomerId)
+                                .Distinct();
+
+                if (rawResult.Any())
+                {
+                    return Ok($"Customer= {string.Join(",", rawResult)}");
+                }
+
+                return NotFound(new { message = "No data found for customer." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("PurachesController:Method:GetCustomerMadePurchasesInLast6MonthOfYear Error: {ex}", ex);
+
+                var json = JsonConvert.SerializeObject(ex);
+
+                return StatusCode(StatusCodes.Status500InternalServerError, json);
+            }
+        }
+
+        // GET /api/Purchase/Customer/C001
+        [HttpGet("GetCustomerMadePurchasesInYear/{year}")]
+        public ActionResult<IEnumerable<object>> GetCustomerMadePurchasesInYear(int year)
+        {
+            _logger.LogInformation("PurachesController:Method:GetCustomerMadePurchasesInYear called.");
+            try
+            {
+                var rawResult = _dbService.GetAllPurchase()
+                                .Where(pur => pur.PurchaseDate.Year == year)
+                                .OrderBy(month => month.PurchaseDate.Month)
+                                .Select(cus => cus.CustomerId)
+                                .Distinct();
+
+                if (rawResult.Any())
+                {
+                    return Ok($"Customer= {string.Join(",", rawResult)}");
+                }
+
+                return NotFound(new { message = "No data found for customer." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("PurachesController:Method:GetCustomerMadePurchasesInYear Error: {ex}", ex);
+
+                var json = JsonConvert.SerializeObject(ex);
+
+                return StatusCode(StatusCodes.Status500InternalServerError, json);
+            }
+        }
+
+
 
         private static int GetMedianAmt(IOrderedEnumerable<Purchase> cus)
         {
