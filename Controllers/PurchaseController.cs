@@ -2,7 +2,7 @@
 using EmployeeManagement.Service;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
+using System.Text.Json;
 using static CCMPreparation.Controllers.OrderController;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -224,7 +224,7 @@ namespace CCMPreparation.Controllers
             {
                 _logger.LogError("PurachesController:Method:GetCustomerMedianPurchaseAmtInLast3MonthOfYear Error: {ex}", ex);
 
-                var json = JsonConvert.SerializeObject(ex);
+                var json = JsonSerializer.Serialize(ex);
 
                 return StatusCode(StatusCodes.Status500InternalServerError, json);
             }
@@ -255,7 +255,7 @@ namespace CCMPreparation.Controllers
             {
                 _logger.LogError("PurachesController:Method:GetCustomerMadePurchasesInLast6MonthOfYear Error: {ex}", ex);
 
-                var json = JsonConvert.SerializeObject(ex);
+                var json = JsonSerializer.Serialize(ex);
 
                 return StatusCode(StatusCodes.Status500InternalServerError, json);
             }
@@ -285,7 +285,7 @@ namespace CCMPreparation.Controllers
             {
                 _logger.LogError("PurachesController:Method:GetCustomerMadePurchasesInYear Error: {ex}", ex);
 
-                var json = JsonConvert.SerializeObject(ex);
+                var json = JsonSerializer.Serialize(ex);
 
                 return StatusCode(StatusCodes.Status500InternalServerError, json);
             }
@@ -318,7 +318,7 @@ namespace CCMPreparation.Controllers
             {
                 _logger.LogError("PurachesController:Method:GetTotalPurchasesMadeOnEachDaysOfYear Error: {ex}", ex);
 
-                var json = JsonConvert.SerializeObject(ex);
+                var json = JsonSerializer.Serialize(ex);
 
                 return StatusCode(StatusCodes.Status500InternalServerError, json);
             }
@@ -352,7 +352,7 @@ namespace CCMPreparation.Controllers
             {
                 _logger.LogError("PurachesController:Method:GetTotalPurchasesMadeOnEachDaysInLast3Months Error: {ex}", ex);
 
-                var json = JsonConvert.SerializeObject(ex);
+                var json = JsonSerializer.Serialize(ex);
 
                 return StatusCode(StatusCodes.Status500InternalServerError, json);
             }
@@ -385,7 +385,7 @@ namespace CCMPreparation.Controllers
             {
                 _logger.LogError("PurachesController:Method:GetAveragePurchasesMadeOnEachDaysOfYear Error: {ex}", ex);
 
-                var json = JsonConvert.SerializeObject(ex);
+                var json = JsonSerializer.Serialize(ex);
 
                 return StatusCode(StatusCodes.Status500InternalServerError, json);
             }
@@ -421,7 +421,7 @@ namespace CCMPreparation.Controllers
             {
                 _logger.LogError("PurachesController:Method:GetTotalPurchasesMadeOnWeekDaysOfYear Error: {ex}", ex);
 
-                var json = JsonConvert.SerializeObject(ex);
+                var json = JsonSerializer.Serialize(ex);
 
                 return StatusCode(StatusCodes.Status500InternalServerError, json);
             }
@@ -458,7 +458,7 @@ namespace CCMPreparation.Controllers
             {
                 _logger.LogError("PurachesController:Method:GetTotalPurchasesMadeOnWeekendfYear Error: {ex}", ex);
 
-                var json = JsonConvert.SerializeObject(ex);
+                var json = JsonSerializer.Serialize(ex);
 
                 return StatusCode(StatusCodes.Status500InternalServerError, json);
             }
@@ -493,7 +493,7 @@ namespace CCMPreparation.Controllers
             {
                 _logger.LogError("PurachesController:Method:GetHighestPurchasesMadeInDayOfWeekOfYear Error: {ex}", ex);
 
-                var json = JsonConvert.SerializeObject(ex);
+                var json = JsonSerializer.Serialize(ex);
 
                 return StatusCode(StatusCodes.Status500InternalServerError, json);
             }
@@ -528,7 +528,7 @@ namespace CCMPreparation.Controllers
             {
                 _logger.LogError("PurachesController:Method:GetLowestPurchasesMadeInDayOfWeekOfYear Error: {ex}", ex);
 
-                var json = JsonConvert.SerializeObject(ex);
+                var json = JsonSerializer.Serialize(ex);
 
                 return StatusCode(StatusCodes.Status500InternalServerError, json);
             }
@@ -556,7 +556,7 @@ namespace CCMPreparation.Controllers
             {
                 _logger.LogError("PurachesController:Method:GetTotalPurchasesMadeInMonthOfYear Error: {ex}", ex);
 
-                var json = JsonConvert.SerializeObject(ex);
+                var json = JsonSerializer.Serialize(ex);
 
                 return StatusCode(StatusCodes.Status500InternalServerError, json);
             }

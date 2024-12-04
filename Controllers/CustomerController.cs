@@ -1,7 +1,6 @@
 ﻿using EmployeeManagement.Service;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using static CCMPreparation.Controllers.OrderController;
+using System.Text.Json; 
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -55,7 +54,7 @@ namespace CCMPreparation.Controllers
             {
                 _logger.LogError("CustomerController:Method:GetPurchaseAndOrderInfo Error: {ex}", ex);
 
-                var json = JsonConvert.SerializeObject(ex);
+                var json = JsonSerializer.Serialize(ex);
 
                 return StatusCode(StatusCodes.Status500InternalServerError, json);
             }
