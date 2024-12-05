@@ -356,51 +356,57 @@ namespace CCMPreparation.Controllers
         }
 
         // GET /api/<Sale>/year/2023
-        [HttpGet("GetLeastSoldProductMonthWiseOfYear/year/{year}")]
-        public ActionResult<IEnumerable<object>> GetLeastSoldProductMonthWiseOfYear(int year)
+        [HttpGet("GetProductGroupedBySeason/Top/{top}")]
+        public ActionResult<IEnumerable<object>> GetProductGroupedBySeason(int top)
         {
-            _logger.LogInformation("PurchaseController:Method:GetLeastSoldProductMonthWiseOfYear Called");
+            _logger.LogInformation("PurchaseController:Method:GetProductGroupedBySeason Called");
 
             try
             {
-
-                if (year <= 0)
+                if (top <= 0)
                 {
-                    return BadRequest();
+                    var rawResult = _dbService.GetAllSale()
+                                    .GroupBy(group => Helpers.GetSeason(group.SaleDate))
+                                    .Select(result => new
+                                    {
+                                        Season = result.Key,
+                                        ProductSales = result.GroupBy(group1 => group1.ProductName)
+                                        .Select(newresult => new
+                                        {
+                                            Productname = newresult.Key,
+                                            TotalQuantity = newresult.Sum(quan => quan.QuantitySold)
+                                        })
+                                    });
+
+                    if (rawResult.Any())
+                        return Ok(rawResult);
+                }
+                else
+                {
+                    var rawResult = _dbService.GetAllSale()
+                                    .GroupBy(group => Helpers.GetSeason(group.SaleDate))
+                                    .Select(result => new
+                                    {
+                                        Season = result.Key,
+                                        ProductSales = result.GroupBy(group1 => group1.ProductName)
+                                        .Select(newresult => new
+                                        {
+                                            Productname = newresult.Key,
+                                            TotalQuantity = newresult.Sum(quan => quan.QuantitySold)
+                                        })
+                                        .OrderByDescending(result => result.TotalQuantity)
+                                        .Take(top)
+                                    });
+
+                    if (rawResult.Any())
+                        return Ok(rawResult);
                 }
 
-                var rawResult = _dbService.GetAllSale()
-                              .Where(yr => yr.SaleDate.Year == year)
-                              .GroupBy(group => new
-                              {
-                                  Year = group.SaleDate.Year,
-                                  Month = group.SaleDate.Month,
-                                  Product = group.ProductName
-                              })
-                              .Select(sold => new
-                              {
-                                  Year = sold.Key.Year,
-                                  Month = sold.Key.Month,
-                                  Product = sold.Key.Product,
-                                  TotalQuantity = sold.Sum(sold => sold.QuantitySold)
-                              })
-                              .GroupBy(group2 => new
-                              {
-                                  group2.Year,
-                                  group2.Month
-                              })
-                              .Select(result => result
-                                               .OrderBy(ord2 => ord2.TotalQuantity).First());
-
-
-                if (rawResult is not null)
-                { return Ok(rawResult); }
-
-                return NotFound();
+                return NotFound("No Data Found");
             }
             catch (Exception ex)
             {
-                _logger.LogError("PurchaseController:Method:GetLeastSoldProductMonthWiseOfYear: {ex}", ex);
+                _logger.LogError("PurchaseController:Method:GetProductGroupedBySeason: {ex}", ex);
                 return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
@@ -484,6 +490,55 @@ namespace CCMPreparation.Controllers
             catch (Exception ex)
             {
                 _logger.LogError("PurchaseController:Method:GetAggregateOfEachProductSoldOfYear: {ex}", ex);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
+            }
+        }
+
+        // GET /api/<Sale>/year/2023
+        [HttpGet("GetLeastSoldProductMonthWiseOfYear/year/{year}")]
+        public ActionResult<IEnumerable<object>> GetLeastSoldProductMonthWiseOfYear(int year)
+        {
+            _logger.LogInformation("PurchaseController:Method:GetLeastSoldProductMonthWiseOfYear Called");
+
+            try
+            {
+
+                if (year <= 0)
+                {
+                    return BadRequest();
+                }
+
+                var rawResult = _dbService.GetAllSale()
+                              .Where(yr => yr.SaleDate.Year == year)
+                              .GroupBy(group => new
+                              {
+                                  Year = group.SaleDate.Year,
+                                  Month = group.SaleDate.Month,
+                                  Product = group.ProductName
+                              })
+                              .Select(sold => new
+                              {
+                                  Year = sold.Key.Year,
+                                  Month = sold.Key.Month,
+                                  Product = sold.Key.Product,
+                                  TotalQuantity = sold.Sum(sold => sold.QuantitySold)
+                              })
+                              .GroupBy(group2 => new
+                              {
+                                  group2.Year,
+                                  group2.Month
+                              })
+                              .Select(result => result
+                                               .OrderBy(ord2 => ord2.TotalQuantity).First());
+
+                if (rawResult is not null)
+                { return Ok(rawResult); }
+
+                return NotFound();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("PurchaseController:Method:GetLeastSoldProductMonthWiseOfYear: {ex}", ex);
                 return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }

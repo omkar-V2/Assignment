@@ -1,7 +1,7 @@
 ﻿using EmployeeManagement.Data;
 using static CCMPreparation.Controllers.OrderController;
 
-namespace CCMPreparation.Controllers
+namespace CCMPreparation
 {
     public static class Helpers
     {
@@ -38,6 +38,19 @@ namespace CCMPreparation.Controllers
             {
                 return cus.ElementAt(0).Amount;
             }
+        }
+
+        public static string GetSeason(DateTime date)
+        {
+            int month = date.Month;
+            return month switch
+            {
+                12 or 1 or 2 => "Winter",
+                3 or 4 or 5 => "Spring",
+                6 or 7 or 8 => "Summer",
+                9 or 10 or 11 => "Autumn",
+                _ => throw new ArgumentOutOfRangeException()
+            };
         }
     }
 }

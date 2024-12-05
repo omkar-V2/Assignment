@@ -1,4 +1,6 @@
-﻿using EmployeeManagement.Model;
+﻿using System.Net.Mime;
+using Assignment;
+using EmployeeManagement.Model;
 using EmployeeManagement.Service;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,7 +22,7 @@ namespace CCMPreparation.Controllers
 
         // GET: api/<EmployeeController>        
         [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<Employee>))]
+        [ProducesResponseType(statusCode: StatusCodes.Status200OK, type: typeof(IEnumerable<Employee>), contentType: ContentTypes.Json)]
         [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(object))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public IActionResult Get()

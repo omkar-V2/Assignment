@@ -173,6 +173,54 @@ namespace CCMPreparation.Controllers
             }
         }
 
+        // GET /api/Order/GetTotalNoOfOrderPlacedInLast3Month/2023
+        [HttpGet("GetOrderCountPerMonthByYear")]
+        public ActionResult<IEnumerable<object>> GetOrderCountPerMonthByYear(int year)
+        {
+            _logger.LogInformation("OrderController:Method:GetOrderCountPerMonthByYear called.");
+            try
+            {
+                var rawResult = _dbService.GetAllOrder()
+                                .Where(ord => ord.OrderDateTime.Year == year)
+                                .SelectMany(product => product.Products, (ord, product) => new
+                                {
+                                    orderyear = ord.OrderDateTime.Year,
+                                    ordermonth = ord.OrderDateTime.Month,
+                                    orderno = ord.OrderNo,
+                                    product = product.Title
+                                })
+                                .GroupBy(group1 => new
+                                {
+                                    group1.orderyear,
+                                    group1.ordermonth,
+                                    group1.product
+                                })
+                                .Select(result => new
+                                {
+                                    year = result.Key.orderyear,
+                                    month = result.Key.ordermonth,
+                                    product = result.Key.product,
+                                    productcount = result.Count()
+                                })
+                                .OrderBy(ord => ord.month);
+
+                if (rawResult.Any())
+                {
+                    return Ok(rawResult);
+                }
+
+                return NotFound(new { message = "No data found for customer." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("OrderController:Method:GetOrderCountPerMonthByYear Error: {ex}", ex);
+
+                var json = JsonSerializer.Serialize(ex);
+
+                return StatusCode(StatusCodes.Status500InternalServerError, json);
+            }
+        }
+
 
         private static PartOfDay GetTimeOftheDay(TimeSpan timeSpan)
         {
