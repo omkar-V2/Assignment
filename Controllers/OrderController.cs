@@ -64,6 +64,116 @@ namespace CCMPreparation.Controllers
             }
         }
 
+
+        // GET /api/Order/GetTotalNoOfOrderPlacedInLast3Month/2023
+        [HttpGet("GetTotalNoOfOrderPlacedInLast3Month")]
+        public ActionResult<IEnumerable<object>> GetTotalNoOfOrderPlacedInLast3Month()
+        {
+            _logger.LogInformation("OrderController:Method:GetTotalNoOfOrderPlacedInLast3Month called.");
+            try
+            {
+                var rawResult = _dbService.GetAllOrder()
+                                .GroupBy(ord => ord.OrderDateTime.Month)
+                                .Select(ord => new
+                                {
+                                    orderdatemonth = ord.Key,
+                                    totalorders = ord.Count()
+                                })
+                                .OrderBy(ord => ord.orderdatemonth)
+                                .TakeLast(3);
+
+                if (rawResult.Any())
+                {
+                    return Ok(rawResult);
+                }
+
+                return NotFound(new { message = "No data found for customer." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("OrderController:Method:GetTotalNoOfOrderPlacedInLast3Month Error: {ex}", ex);
+
+                var json = JsonSerializer.Serialize(ex);
+
+                return StatusCode(StatusCodes.Status500InternalServerError, json);
+            }
+        }
+
+        // GET /api/Order/GetTotalUniqueCustomersPlacedOrderInLast3Month/2023
+        [HttpGet("GetTotalNoOfUniqueCustomersPlacedOrderInLast3Month")]
+        public ActionResult<IEnumerable<object>> GetTotalNoOfUniqueCustomersPlacedOrderInLast3Month()
+        {
+            _logger.LogInformation("OrderController:Method:GetTotalNoOfUniqueCustomersPlacedOrderInLast3Month called.");
+            try
+            {
+                var rawResult = _dbService.GetAllOrder()
+                                .GroupBy(ord => new
+                                {
+                                    ord.OrderDateTime.Month
+                                })
+                                .Select(ord => new
+                                {
+                                    orderdatemonth = ord.Key.Month,
+                                    customers = string.Join(",", ord.DistinctBy(ord => ord.CustomerId).Select(ord => ord.CustomerId))
+                                })
+                                .OrderBy(ord => ord.orderdatemonth)
+                                .TakeLast(3);
+
+                if (rawResult.Any())
+                {
+                    return Ok(rawResult);
+                }
+
+                return NotFound(new { message = "No data found for customer." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("OrderController:Method:GetTotalNoOfUniqueCustomersPlacedOrderInLast3Month Error: {ex}", ex);
+
+                var json = JsonSerializer.Serialize(ex);
+
+                return StatusCode(StatusCodes.Status500InternalServerError, json);
+            }
+        }
+
+        // GET /api/Order/GetTotalUniqueCustomersPlacedOrderInLast3Month/2023
+        [HttpGet("GetGroupOfCustomersPlacedOrderInLast3Month")]
+        public ActionResult<IEnumerable<object>> GetGroupOfCustomersPlacedOrderInLast3Month()
+        {
+            _logger.LogInformation("OrderController:Method:GetGroupOfCustomersPlacedOrderInLast3Month called.");
+            try
+            {
+                var rawResult = _dbService.GetAllOrder()
+                                .GroupBy(ord => new
+                                {
+                                    ord.OrderDateTime.Month
+                                })
+                                .Select(ord => new
+                                {
+                                    orderdatemonth = ord.Key.Month,
+                                    customers = string.Join(",", ord.Select(ord => ord.CustomerId))
+                                })
+                                .OrderBy(ord => ord.orderdatemonth)
+                                .TakeLast(3);
+
+                if (rawResult.Any())
+                {
+                    return Ok(rawResult);
+                }
+
+                return NotFound(new { message = "No data found for customer." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("OrderController:Method:GetGroupOfCustomersPlacedOrderInLast3Month Error: {ex}", ex);
+
+                var json = JsonSerializer.Serialize(ex);
+
+                return StatusCode(StatusCodes.Status500InternalServerError, json);
+            }
+        }
+
+
         private static PartOfDay GetTimeOftheDay(TimeSpan timeSpan)
         {
             if (timeSpan.Hours >= 5 && timeSpan.Hours < 12)
