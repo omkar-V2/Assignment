@@ -18,7 +18,7 @@ namespace CCMPreparation
                 return PartOfDay.Night;
         }
 
-        public static int GetMedianAmt(IOrderedEnumerable<Purchase> cus)
+        public static int GetMedianAmt(IEnumerable<int> cus)
         {
             if (!cus.Any())
                 return 0;
@@ -27,16 +27,16 @@ namespace CCMPreparation
 
             if (count / 2 != 0 && count % 2 == 0) //even
             {
-                return ((cus.ElementAt((count / 2) - 1)).Amount +
-                         (cus.ElementAt(count / 2)).Amount) / 2;
+                return ((cus.ElementAt((count / 2) - 1)) +
+                         (cus.ElementAt(count / 2))) / 2;
             }
             else if (count / 2 != 0 && count % 2 != 0) //odd
             {
-                return (cus.OrderBy(ord => ord.Amount).ElementAt((count / 2))).Amount;
+                return (cus.OrderBy(ord => ord).ElementAt((count / 2)));
             }
             else // for one element
             {
-                return cus.ElementAt(0).Amount;
+                return cus.ElementAt(0);
             }
         }
 

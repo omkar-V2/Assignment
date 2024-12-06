@@ -198,6 +198,14 @@ namespace CCMPreparation.Controllers
             _logger.LogInformation("PurachesController:Method:GetCustomerMedianPurchaseAmtInLast3MonthOfYear called.");
             try
             {
+                var fromDatePurchase = _dbService.GetAllPurchase().Max(sup => sup.PurchaseDate).AddMonths(-3);
+
+                var rawResult1 = Helpers.GetMedianAmt(_dbService
+                                                     .GetAllPurchase()
+                                                     .Where(pur => pur.PurchaseDate > fromDatePurchase)
+                                                     .Select(pur1 => pur1.Amount)
+                                                     .OrderBy(ord => ord));
+
                 var rawResult = _dbService.GetAllPurchase()
                                 .GroupBy(group => new
                                 {
@@ -208,14 +216,13 @@ namespace CCMPreparation.Controllers
                                 {
                                     cus.Key.Year,
                                     cus.Key.Month,
-                                    ListedAmts = string.Join(",", cus.Select(amt => amt.Amount).Order()),
-                                    MedianAmt = Helpers.GetMedianAmt(cus.OrderBy(ord => ord.Amount))
+                                    ListedAmts = string.Join(",", cus.Select(amt => amt.Amount).Order())
                                 })
                                 .TakeLast(3);
 
                 if (rawResult.Any())
                 {
-                    return Ok(rawResult);
+                    return Ok(new { rawResult, message = $"Customer Median Purchase Amt In Last 3 Month Of Year:{rawResult1}" });
                 }
 
                 return NotFound(new { message = "No data found for customer." });
@@ -237,13 +244,13 @@ namespace CCMPreparation.Controllers
             _logger.LogInformation("PurachesController:Method:GetCustomerMadePurchasesInLast6MonthOfYear called.");
             try
             {
+                var fromDatePurchase = new DateTime(year, 12, 31).AddMonths(-6);
+
+
                 var rawResult = _dbService.GetAllPurchase()
-                                .Where(pur => pur.PurchaseDate.Year == year)
-                                .OrderBy(month => month.PurchaseDate.Month)
-                                .TakeLast(6)
+                                .Where(pur => pur.PurchaseDate > fromDatePurchase)
                                 .Select(cus => cus.CustomerId)
                                 .Distinct();
-
                 if (rawResult.Any())
                 {
                     return Ok($"Customer= {string.Join(",", rawResult)}");
@@ -331,9 +338,10 @@ namespace CCMPreparation.Controllers
             _logger.LogInformation("PurachesController:Method:GetTotalPurchasesMadeOnEachDaysInLast3Months called.");
             try
             {
+                var fromDate = _dbService.GetAllPurchase().Max(pur => pur.PurchaseDate).AddMonths(-3);
+
                 var rawResult = _dbService.GetAllPurchase()
-                                .OrderBy(pur => pur.PurchaseDate.Month)
-                                .TakeLast(3)
+                                .Where(pur => pur.PurchaseDate > fromDate)
                                 .GroupBy(group => group.PurchaseDate.DayOfWeek)
                                 .Select(record => new
                                 {

@@ -72,22 +72,18 @@ namespace CCMPreparation.Controllers
             _logger.LogInformation("OrderController:Method:GetTotalNoOfOrderPlacedInLast3Month called.");
             try
             {
+                var fromDate = _dbService.GetAllOrder().Max(ord => ord.OrderDateTime).AddMonths(-3);
+
                 var rawResult = _dbService.GetAllOrder()
-                                .GroupBy(ord => ord.OrderDateTime.Month)
-                                .Select(ord => new
-                                {
-                                    orderdatemonth = ord.Key,
-                                    totalorders = ord.Count()
-                                })
-                                .OrderBy(ord => ord.orderdatemonth)
-                                .TakeLast(3);
+                                 .Where(get => get.OrderDateTime > fromDate);
+                var result = rawResult.Count();
 
-                if (rawResult.Any())
+                return Ok(new
                 {
-                    return Ok(rawResult);
-                }
-
-                return NotFound(new { message = "No data found for customer." });
+                    message = $"Total No Of Order Placed In Last 3 Month:{result}",
+                    rawResult
+                });
+                // return NotFound(new { message = "No data found for customer." });
             }
             catch (Exception ex)
             {
@@ -106,25 +102,17 @@ namespace CCMPreparation.Controllers
             _logger.LogInformation("OrderController:Method:GetTotalNoOfUniqueCustomersPlacedOrderInLast3Month called.");
             try
             {
+                var fromDate = _dbService.GetAllOrder().Max(ord => ord.OrderDateTime).AddMonths(-3);
+
                 var rawResult = _dbService.GetAllOrder()
-                                .GroupBy(ord => new
-                                {
-                                    ord.OrderDateTime.Month
-                                })
-                                .Select(ord => new
-                                {
-                                    orderdatemonth = ord.Key.Month,
-                                    customers = string.Join(",", ord.DistinctBy(ord => ord.CustomerId).Select(ord => ord.CustomerId))
-                                })
-                                .OrderBy(ord => ord.orderdatemonth)
-                                .TakeLast(3);
+                                .Where(get => get.OrderDateTime > fromDate)
+                                .Select(ord => ord.CustomerId)
+                                .Distinct()
+                                .Count();
 
-                if (rawResult.Any())
-                {
-                    return Ok(rawResult);
-                }
+                return Ok($"Total No Of Unique Customers Placed Order In Last 3 Month: {rawResult}");
 
-                return NotFound(new { message = "No data found for customer." });
+                // return NotFound(new { message = "No data found for customer." });
             }
             catch (Exception ex)
             {
@@ -143,18 +131,22 @@ namespace CCMPreparation.Controllers
             _logger.LogInformation("OrderController:Method:GetGroupOfCustomersPlacedOrderInLast3Month called.");
             try
             {
+                var fromDate = _dbService.GetAllOrder().Max(ord => ord.OrderDateTime).AddMonths(-3);
+
                 var rawResult = _dbService.GetAllOrder()
+                                 .Where(get => get.OrderDateTime > fromDate)
                                 .GroupBy(ord => new
                                 {
+                                    ord.OrderDateTime.Year,
                                     ord.OrderDateTime.Month
                                 })
                                 .Select(ord => new
                                 {
+                                    orderdateyear = ord.Key.Year,
                                     orderdatemonth = ord.Key.Month,
                                     customers = string.Join(",", ord.Select(ord => ord.CustomerId))
                                 })
-                                .OrderBy(ord => ord.orderdatemonth)
-                                .TakeLast(3);
+                                .OrderBy(ord => ord.orderdatemonth);
 
                 if (rawResult.Any())
                 {
@@ -180,7 +172,32 @@ namespace CCMPreparation.Controllers
             _logger.LogInformation("OrderController:Method:GetOrderCountPerMonthByYear called.");
             try
             {
-                var rawResult = _dbService.GetAllOrder()
+
+                //var rawResult = _dbService.GetAllOrder()
+                //                .Where(ord => ord.OrderDateTime.Year == year)
+                //                .SelectMany(product => product.Products, (ord, product) => new
+                //                {
+                //                    orderyear = ord.OrderDateTime.Year,
+                //                    ordermonth = ord.OrderDateTime.Month,
+                //                    orderno = ord.OrderNo,
+                //                    product = product.Title
+                //                })
+                //                .GroupBy(group1 => new
+                //                {
+                //                    group1.orderyear,
+                //                    group1.ordermonth,
+                //                    group1.product
+                //                })
+                //                .Select(result => new
+                //                {
+                //                    year = result.Key.orderyear,
+                //                    month = result.Key.ordermonth,
+                //                    product = result.Key.product,
+                //                    productcount = result.Count()
+                //                })
+                //               .OrderBy(ord => ord.month);
+
+                var rawResult1 = _dbService.GetAllOrder()
                                 .Where(ord => ord.OrderDateTime.Year == year)
                                 .SelectMany(product => product.Products, (ord, product) => new
                                 {
@@ -192,21 +209,22 @@ namespace CCMPreparation.Controllers
                                 .GroupBy(group1 => new
                                 {
                                     group1.orderyear,
-                                    group1.ordermonth,
-                                    group1.product
+                                    group1.ordermonth
                                 })
                                 .Select(result => new
                                 {
                                     year = result.Key.orderyear,
                                     month = result.Key.ordermonth,
-                                    product = result.Key.product,
-                                    productcount = result.Count()
+                                    product = result.GroupBy(prd => prd.product)
+                                             .Select(ord => new { Title = ord.Key, ProdCount = ord.Count() }),
+                                    totalproductcount = result.Count()
                                 })
-                                .OrderBy(ord => ord.month);
+                               .OrderBy(ord => ord.month);
 
-                if (rawResult.Any())
+
+                if (rawResult1.Any())
                 {
-                    return Ok(rawResult);
+                    return Ok(new { rawResult1 });
                 }
 
                 return NotFound(new { message = "No data found for customer." });

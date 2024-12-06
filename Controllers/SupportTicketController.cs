@@ -69,21 +69,31 @@ namespace Assignment.Controllers
             _logger.LogInformation("SupportTicketController:Method:GetSupportTicketsAverageInLast3Month called.");
             try
             {
-                var rawResult = _dbService.GetAllSupportTicket()
+                var fromDate = _dbService.GetAllSupportTicket().Max(sup => sup.SupportDateTime).AddMonths(-3);
+
+                var rawResult1 = _dbService.GetAllSupportTicket()
+                    .Where(supp => supp.SupportDateTime > fromDate)
                     .GroupBy(group => group.SupportDateTime.Month)
                     .Select(sup => new
                     {
                         month = sup.Key,
                         ticket = sup.Count()
                     })
-                  .TakeLast(3);
+                    .Average(tic => tic.ticket);
 
-                var result = rawResult.Average(tic => tic.ticket);
+                var rawResult = _dbService.GetAllSupportTicket()
+                     .Where(supp => supp.SupportDateTime > fromDate)
+                     .GroupBy(group => group.SupportDateTime.Month)
+                     .Select(sup => new
+                     {
+                         month = sup.Key,
+                         ticket = sup.Count()
+                     });
 
                 return Ok(new
                 {
-                    rawResult = rawResult,
-                    message = $"Support Tickets Average In Last 3 Month:{result}"
+                    message = $"Support Tickets Average In Last 3 Month:{rawResult1}",
+                    rawResult
                 });
 
                 //return NotFound(new { message = "No data found for customer." });
@@ -105,38 +115,19 @@ namespace Assignment.Controllers
             _logger.LogInformation("SupportTicketController:Method:GetSupportTicketsTotalNoPerCategoryInLast3Month called.");
             try
             {
-                var rawResult = _dbService.GetAllSupportTicket()
-                    .GroupBy(group => new
-                    {
-                        group.SupportDateTime.Month
-                    })
-                    .Select(sup => new
-                    {
-                        month = sup.Key.Month,
-                        record = sup
-                        .GroupBy(group => group.Category)
-                        .Select(sup1 => new
-                        {
-                            category = sup1.Key,
-                            ticketCount = sup1.Count()
-                        })
-                    })
-                    .OrderBy(cat => cat.month)
-                    .TakeLast(3)
-                    .SelectMany(nestedrecord => nestedrecord.record, (nestedrecord, record) => new
-                    {
-                        category = record.category,
-                        tickets = nestedrecord.record.Sum(sm => sm.ticketCount)
-                    });
+                var fromDate = _dbService.GetAllSupportTicket().Max(sup => sup.SupportDateTime).AddMonths(-3);
 
-                var result = rawResult.GroupBy(cat => cat.category)
-                  .Select(result => new
-                  {
-                      category = result.Key,
-                      tickets = result.Sum(sm => sm.tickets)
-                  });
-                if (result.Any() || rawResult.Any())
-                    return Ok(new { rawResult, result });
+                var rawResult = _dbService.GetAllSupportTicket()
+                    .Where(supp => supp.SupportDateTime > fromDate)
+                    .GroupBy(group => group.Category)
+                     .Select(sup1 => new
+                     {
+                         category = sup1.Key,
+                         ticketCount = sup1.Count()
+                     });
+
+                if (rawResult.Any())
+                    return Ok(new { rawResult });
 
                 return NotFound(new { message = "No data found for customer." });
             }
@@ -151,35 +142,33 @@ namespace Assignment.Controllers
         }
 
         // GET api/<SupportTicketController>
-        [HttpGet("GetSupportTicketsTotalNoInLast3Month")]
+        [HttpGet("GetSupportTicketsTotalNoPerMonthInLast3Month")]
         public ActionResult<object> GetSupportTicketsTotalInLast3Month()
         {
-            _logger.LogInformation("SupportTicketController:Method:GetSupportTicketsTotalNoInLast3Month called.");
+            _logger.LogInformation("SupportTicketController:Method:GetSupportTicketsTotalNoPerMonthInLast3Month called.");
             try
             {
+                var fromDate = _dbService.GetAllSupportTicket().Max(sup => sup.SupportDateTime).AddMonths(-3);
+
                 var rawResult = _dbService.GetAllSupportTicket()
-                    .GroupBy(group => group.SupportDateTime.Month)
-                    .Select(sup => new
+                                .Where(supp => supp.SupportDateTime > fromDate)
+                                .GroupBy(group => group.SupportDateTime.Month)
+                                .Select(sup => new
+                                {
+                                    month = sup.Key,
+                                    ticket = sup.Count()
+                                });
+                if (rawResult.Any())
+                    return Ok(new
                     {
-                        month = sup.Key,
-                        ticket = sup.Count()
-                    })
-                  .TakeLast(3);
+                        rawResult
+                    });
 
-                var result = rawResult.Sum(tick => tick.ticket);
-
-
-                return Ok(new
-                {
-                    rawResult = rawResult,
-                    message = $"Support Tickets Total No. In Last 3 Month:{result}"
-                });
-
-                //return NotFound(new { message = "No data found for customer." });
+                return NotFound(new { message = "No data found." });
             }
             catch (Exception ex)
             {
-                _logger.LogError("SupportTicketController:Method:GetSupportTicketsTotalNoInLast3Month Error: {ex}", ex);
+                _logger.LogError("SupportTicketController:Method:GetSupportTicketsTotalNoPerMonthInLast3Month Error: {ex}", ex);
 
                 var json = JsonSerializer.Serialize(ex);
 
@@ -257,6 +246,38 @@ namespace Assignment.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, json);
             }
 
+        }
+
+        //GET api/<SupportTicketController>/GetHighestNoSupportTicketsMonthOfYear
+        [HttpGet("GetHighestNoSupportTicketsMonthOfYear/{year}")]
+        public ActionResult<IEnumerable<object>> GetHighestNoSupportTicketsMonthOfYear(int year)
+        {
+            _logger.LogInformation("SupportTicketController:Method:GetHighestNoSupportTicketsMonthOfYear called.");
+            try
+            {
+                var rawResult = _dbService.GetAllSupportTicket()
+                      .Where(tick => tick.SupportDateTime.Year == year)
+                      .GroupBy(supp => supp.SupportDateTime.Month)
+                      .Select(supp => new
+                      {
+                          ticketmonth = supp.Key,
+                          ticketcount = supp.Count()
+                      })
+                      .OrderByDescending(high => high.ticketcount);
+
+                if (rawResult.Any())
+                    return Ok(new { MonthWithHighestNoOfSupportTickets = rawResult.MaxBy(tic => tic.ticketcount)?.ticketmonth, rawResult });
+
+                return NotFound(new { message = "No data found." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("SupportTicketController:Method:GetHighestNoSupportTicketsMonthOfYear Error: {ex}", ex);
+
+                var json = JsonSerializer.Serialize(ex);
+
+                return StatusCode(StatusCodes.Status500InternalServerError, json);
+            }
         }
 
         private static string GetStatus(IGrouping<object, SupportTicket> supp)

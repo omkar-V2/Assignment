@@ -59,7 +59,7 @@ namespace CCMPreparation.Controllers
 
                 if (rawResult.Any())
                 {
-                    return Ok(rawResult);
+                    return Ok(new { ProductWithHighQuantityFirst3Month = rawResult });
                 }
 
                 return NotFound(new { message = "no data found for year {year} " });
@@ -85,22 +85,14 @@ namespace CCMPreparation.Controllers
                     return BadRequest();
                 }
 
-
                 var rawResult = _dbService.GetAllSale()
-                                .Where(sale => sale.SaleDate.Year == year && sale.SaleDate.Month <= month)
-                                .GroupBy(gr => gr.ProductName)
-                                .Select(sales => new
-                                {
-                                    Product = sales.Key,
-                                    TotalAmnt = sales.Sum(grp => grp.QuantitySold)
-                                });
+                                .Where(sale => sale.SaleDate.Year == year && sale.SaleDate.Month == month)
+                                .Sum(quantity => quantity.QuantitySold);
 
-                if (rawResult.Any())
-                {
-                    return Ok(rawResult);
-                }
 
-                return NotFound(new { message = "no data found for year {year} and month{month}" });
+                return Ok($"Total Sales Of Year {year} For Month {month} is:{rawResult}");
+
+                // return NotFound(new { message = "no data found for year {year} and month{month}" });
             }
             catch (Exception ex)
             {
@@ -122,9 +114,10 @@ namespace CCMPreparation.Controllers
                     return BadRequest();
                 }
 
+                var fromDate = new DateTime(year, 12, 31).AddMonths(-6);
+
                 var rawResult = _dbService.GetAllSale()
-                                   .OrderBy(sale => sale.SaleDate.Year == year)
-                                   .TakeLast(6)
+                                   .Where(sale => sale.SaleDate.Year == year && sale.SaleDate > fromDate)
                                    .GroupBy(gr => gr.ProductName)
                                    .Select(sales => new
                                    {
@@ -133,7 +126,8 @@ namespace CCMPreparation.Controllers
                                    })
                                    .OrderByDescending(pop => pop.TotalAmnt).First();
 
-                if (rawResult is not null) { return Ok(rawResult); }
+
+                if (rawResult is not null) { return Ok(new { rawResult }); }
 
                 return NotFound(new { message = " no data found for 6 month of year:{year}.", year });
             }
@@ -157,9 +151,10 @@ namespace CCMPreparation.Controllers
                     return BadRequest();
                 }
 
+                var fromDate = new DateTime(year, 12, 31).AddMonths(-6);
+
                 var rawResult = _dbService.GetAllSale()
-                                   .OrderBy(sale => sale.SaleDate.Year == year)
-                                   .TakeLast(6)
+                                   .Where(sale => sale.SaleDate.Year == year && sale.SaleDate > fromDate)
                                    .GroupBy(gr => gr.ProductName)
                                    .Select(sales => new
                                    {
@@ -168,7 +163,7 @@ namespace CCMPreparation.Controllers
                                    })
                                    .OrderBy(pop => pop.TotalAmnt).First();
 
-                if (rawResult is not null) { return Ok(rawResult); }
+                if (rawResult is not null) { return Ok(new { rawResult }); }
 
                 return NotFound(new { message = " no data found for 6 month of year:{year}.", year });
             }
@@ -194,19 +189,14 @@ namespace CCMPreparation.Controllers
                 }
 
                 var rawResult = _dbService.GetAllSale()
-                              .Where(yr => yr.SaleDate.Year == year)
-                              .GroupBy(group => new
-                              {
-                                  Year = group.SaleDate.Year,
-                                  Product = group.ProductName
-                              })
-                              .Select(sold => new
-                              {
-                                  Year = sold.Key.Year,
-                                  Product = sold.Key.Product,
-                                  Sold = sold.Sum(sold => sold.QuantitySold)
-                              })
-                              .OrderByDescending(sold => sold.Sold).First();
+                                 .Where(sale => sale.SaleDate.Year == year)
+                                 .GroupBy(gr => gr.ProductName)
+                                 .Select(sales => new
+                                 {
+                                     Product = sales.Key,
+                                     TotalAmnt = sales.Sum(grp => grp.QuantitySold)
+                                 })
+                                 .OrderByDescending(pop => pop.TotalAmnt).First();
 
                 if (rawResult is not null)
                 { return Ok(rawResult); }

@@ -72,20 +72,22 @@ namespace CCMPreparation.Controllers
             _logger.LogInformation("CustomerController:Method:GetLast3MonthsCustomerOrderInfoOfPurchases called.");
             try
             {
-                var rawResult = _dbService.GetAllPurchase().Where(pur => pur.CustomerId == customerId)
-                    .Join(_dbService.GetAllOrder().Where(ord => ord.CustomerId == customerId), purchase => purchase.CustomerId, order => order.CustomerId, (purchase, order) => new
-                    {
-                        purchase.PurchaseDate,
-                        order.OrderDateTime,
-                        order.OrderNo,
-                        Product = order.Products
-                    })
-                .OrderBy(result => result.PurchaseDate.Month)
-                .TakeLast(3);
+                var fromDatePurchase = _dbService.GetAllPurchase().Max(sup => sup.PurchaseDate).AddMonths(-3);
+
+                var rawResult = _dbService.GetAllPurchase()
+                                .Where(pur => pur.CustomerId == customerId && pur.PurchaseDate > fromDatePurchase)
+                                .Join(_dbService.GetAllOrder().Where(ord => ord.CustomerId == customerId),
+                                  purchase => purchase.CustomerId, order => order.CustomerId,
+                                  (purchase, order) => new
+                                  {
+                                      order.OrderNo,
+                                      order.OrderDateTime
+                                  });
+
 
                 if (rawResult.Any())
                 {
-                    return Ok(rawResult);
+                    return Ok(new { rawResult });
                 }
 
                 return NotFound(new { message = "No data found for customer." });
@@ -100,23 +102,23 @@ namespace CCMPreparation.Controllers
             }
         }
 
-        //Get: api/Customer/GetLast3MonthsCustomerOrderInfoOfPurchases/customerId
+        //Get: api/Customer/GetLast3MonthsCustomerPurchaseInfo/customerId
         [HttpGet("GetLast3MonthsCustomerPurchaseInfo/{customerId}")]
         public ActionResult<IEnumerable<object>> GetLast3MonthsCustomerPurchaseInfo(string customerId)
         {
             _logger.LogInformation("CustomerController:Method:GetLast3MonthsCustomerPurchaseInfo called.");
             try
             {
+                var fromDatePurchase = _dbService.GetAllPurchase().Max(sup => sup.PurchaseDate).AddMonths(-3);
+
                 var rawResult = _dbService.GetAllPurchase()
-                    .Where(pur => pur.CustomerId == customerId)
-                    .Join(_dbService.GetAllOrder().Where(ord => ord.CustomerId == customerId), purchase => purchase.CustomerId, order => order.CustomerId, (purchase, order) => new
-                    {
-                        purchase.CustomerId,
-                        purchase.Amount,
-                        purchase.PurchaseDate
-                    })
-                .OrderBy(result => result.PurchaseDate.Month)
-                .TakeLast(3);
+                                .Where(pur => pur.CustomerId == customerId && pur.PurchaseDate > fromDatePurchase)
+                                .Select(purchase => new
+                                {
+                                    purchase.Amount,
+                                    purchase.PurchaseDate
+                                })
+                                .OrderBy(result => result.PurchaseDate.Month);
 
                 if (rawResult.Any())
                 {
