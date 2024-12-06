@@ -113,6 +113,51 @@ namespace Assignment.Controllers
 
         }
 
+        // GET api/<InquiryController>
+        [HttpGet("GetDateWithHighestNoOfInquiryInYear/{year}")]
+        public ActionResult<IEnumerable<object>> GetDateWithHighestNoOfInquiryInYear(int year)
+        {
+            _logger.LogInformation("InquiryController:Method:GetDateWithHighestNoOfInquiryInYear called.");
+            try
+            {
+                var fromDate = _dbService.GetAllInquiry().Max(inq => inq.InquiryDate).AddMonths(-3);
+
+                var rawResult = _dbService.GetAllInquiry()
+                                .Where(get => get.InquiryDate.Year == year)
+                                .GroupBy(group => new
+                                {
+                                    InqDate = group.InquiryDate.Date
+                                })
+                                .Select(inq1 => new
+                                {
+                                    Date = inq1.Key.InqDate,
+                                    QuantityNoOfinquiry = inq1.Max(high => high.Quantity)
+                                })
+                                .GroupBy(group => new
+                                {
+                                    inqcount = group.QuantityNoOfinquiry
+                                })
+                                .MaxBy(inq1 => inq1.Key.inqcount); ;
+
+                if (rawResult != null)
+                    return Ok(new
+                    {
+                        rawResult
+                    });
+
+
+                return NotFound(new { message = "No data found." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("InquiryController:Method:GetDateWithHighestNoOfInquiryInYear Error: {ex}", ex);
+
+                var json = JsonSerializer.Serialize(ex);
+
+                return StatusCode(StatusCodes.Status500InternalServerError, json);
+            }
+
+        }
 
 
         // GET api/<InquiryController>/5

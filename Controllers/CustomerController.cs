@@ -174,6 +174,78 @@ namespace CCMPreparation.Controllers
             }
         }
 
+        //Get: api/Customer/GetUniqueCustomerInteractedInLast3Month
+        [HttpGet("GetUniqueCustomerInteractedInLast3Month")]
+        public ActionResult<IEnumerable<object>> GetUniqueCustomerInteractedInLast3Month()
+        {
+            _logger.LogInformation("CustomerController:Method:GetUniqueCustomerInteractedInLast3Month called.");
+            try
+            {
+                var fromDatePurchase = _dbService.GetAllCustomerActivity().Max(sup => sup.ActivityDate).AddMonths(-3);
+
+                var rawResult = _dbService.GetAllCustomerActivity()
+                                .Where(pur => pur.ActivityDate > fromDatePurchase)
+                                .Select(purchase => new
+                                {
+                                    purchase.CustomerId
+                                })
+                                .Distinct();
+
+                if (rawResult.Any())
+                {
+                    return Ok(rawResult);
+                }
+
+                return NotFound(new { message = "No data found for customer." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("CustomerController:Method:GetUniqueCustomerInteractedInLast3Month Error: {ex}", ex);
+
+                var json = JsonSerializer.Serialize(ex);
+
+                return StatusCode(StatusCodes.Status500InternalServerError, json);
+            }
+        }
+
+        //Get: api/Customer/GetMostActiveCustomerInLast3Month
+        [HttpGet("GetMostActiveCustomerInLast3Month")]
+        public ActionResult<IEnumerable<object>> GetMostActiveCustomerInLast3Month()
+        {
+            _logger.LogInformation("CustomerController:Method:GetMostActiveCustomerInLast3Month called.");
+            try
+            {
+                var fromDatePurchase = _dbService.GetAllCustomerActivity().Max(sup => sup.ActivityDate).AddMonths(-3);
+
+                var rawResult = _dbService.GetAllCustomerActivity()
+                                .Where(pur => pur.ActivityDate > fromDatePurchase)
+                                .GroupBy(purchase => new
+                                {
+                                    purchase.CustomerId,
+                                })
+                                .Select(cus => new { cus.Key.CustomerId, activecount = cus.Count() })
+                                .MaxBy(active => active.activecount)
+                                ;
+
+
+                if (rawResult is not null)
+                {
+                    return Ok(rawResult);
+                }
+
+                return NotFound(new { message = "No data found for customer." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("CustomerController:Method:GetMostActiveCustomerInLast3Month Error: {ex}", ex);
+
+                var json = JsonSerializer.Serialize(ex);
+
+                return StatusCode(StatusCodes.Status500InternalServerError, json);
+            }
+        }
+
+
         public static string GetLoyaltyTier(IGrouping<object, CustomerActivity> loyalty)
         {
             //            -Platinum(12 or more purchases per year)
