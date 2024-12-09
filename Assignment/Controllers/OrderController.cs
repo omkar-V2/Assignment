@@ -36,7 +36,7 @@ namespace CCMPreparation.Controllers
         }
 
         // GET /api/Order/Customer/2023
-        [HttpGet("GetCustomerMadePurchaseInMonthOfYear/month/{month}/year/{year}/TimofDay/{partOfDay}")]
+        [HttpGet("GetCustomerMadePurchasesInafternoonOfFirstMonthOfYear/month/{month}/year/{year}/TimofDay/{partOfDay}")]
         public ActionResult<IEnumerable<object>> GetCustomerMadePurchasesInafternoonOfFirstMonthOfYear(int month, int year, PartOfDay partOfDay)
         {
             _logger.LogInformation("OrderController:Method:GetCustomerMadePurchasesInafternoonOfFirstMonthOfYear called.");
@@ -58,9 +58,7 @@ namespace CCMPreparation.Controllers
             {
                 _logger.LogError("OrderController:Method:GetCustomerMadePurchasesInafternoonOfFirstMonthOfYear Error: {ex}", ex);
 
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 

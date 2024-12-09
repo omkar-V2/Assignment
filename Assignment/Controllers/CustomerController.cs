@@ -244,8 +244,7 @@ namespace CCMPreparation.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, json);
             }
         }
-
-
+         
         public static string GetLoyaltyTier(IGrouping<object, CustomerActivity> loyalty)
         {
             //            -Platinum(12 or more purchases per year)

@@ -550,8 +550,9 @@ namespace CCMPreparation.Controllers
             try
             {
                 var rawResult = _dbService.GetAllPurchase()
-                                .Where(pur => pur.PurchaseDate.Year == year && pur.PurchaseDate.Month == month && Helpers.GetTimeOftheDay(pur.PurchaseDate.TimeOfDay) == partOfDay)
-                                .Count();
+                                .Count(pur => pur.PurchaseDate.Year == year
+                                 && pur.PurchaseDate.Month == month
+                                 && Helpers.GetTimeOftheDay(pur.PurchaseDate.TimeOfDay) == partOfDay);
 
                 if (rawResult > 0)
                 {
