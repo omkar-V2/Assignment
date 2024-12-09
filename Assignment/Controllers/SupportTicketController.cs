@@ -69,7 +69,9 @@ namespace Assignment.Controllers
             _logger.LogInformation("SupportTicketController:Method:GetSupportTicketsAverageInLast3Month called.");
             try
             {
-                var fromDate = _dbService.GetAllSupportTicket().Max(sup => sup.SupportDateTime).AddMonths(-3);
+                // var fromDate = _dbService.GetAllSupportTicket().Max(sup => sup.SupportDateTime).AddMonths(-3);
+
+                var fromDate = DateTime.Now.AddMonths(-3);
 
                 var rawResult1 = _dbService.GetAllSupportTicket()
                     .Where(supp => supp.SupportDateTime > fromDate)
@@ -115,7 +117,9 @@ namespace Assignment.Controllers
             _logger.LogInformation("SupportTicketController:Method:GetSupportTicketsTotalNoPerCategoryInLast3Month called.");
             try
             {
-                var fromDate = _dbService.GetAllSupportTicket().Max(sup => sup.SupportDateTime).AddMonths(-3);
+                //  var fromDate = _dbService.GetAllSupportTicket().Max(sup => sup.SupportDateTime).AddMonths(-3);
+
+                var fromDate = DateTime.Now.AddMonths(-3);
 
                 var rawResult = _dbService.GetAllSupportTicket()
                     .Where(supp => supp.SupportDateTime > fromDate)
@@ -148,7 +152,9 @@ namespace Assignment.Controllers
             _logger.LogInformation("SupportTicketController:Method:GetSupportTicketsTotalNoPerMonthInLast3Month called.");
             try
             {
-                var fromDate = _dbService.GetAllSupportTicket().Max(sup => sup.SupportDateTime).AddMonths(-3);
+                // var fromDate = _dbService.GetAllSupportTicket().Max(sup => sup.SupportDateTime).AddMonths(-3);
+
+                var fromDate = DateTime.Now.AddMonths(-3);
 
                 var rawResult = _dbService.GetAllSupportTicket()
                                 .Where(supp => supp.SupportDateTime > fromDate)

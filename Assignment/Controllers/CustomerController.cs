@@ -72,7 +72,10 @@ namespace CCMPreparation.Controllers
             _logger.LogInformation("CustomerController:Method:GetLast3MonthsCustomerOrderInfoOfPurchases called.");
             try
             {
-                var fromDatePurchase = _dbService.GetAllPurchase().Max(sup => sup.PurchaseDate).AddMonths(-3);
+                //var fromDatePurchase = _dbService.GetAllPurchase().Max(sup => sup.PurchaseDate).AddMonths(-3);
+
+                var fromDatePurchase = DateTime.Now.AddMonths(-3);
+
 
                 var rawResult = _dbService.GetAllPurchase()
                                 .Where(pur => pur.CustomerId == customerId && pur.PurchaseDate > fromDatePurchase)
@@ -109,7 +112,9 @@ namespace CCMPreparation.Controllers
             _logger.LogInformation("CustomerController:Method:GetLast3MonthsCustomerPurchaseInfo called.");
             try
             {
-                var fromDatePurchase = _dbService.GetAllPurchase().Max(sup => sup.PurchaseDate).AddMonths(-3);
+                //var fromDatePurchase = _dbService.GetAllPurchase().Max(sup => sup.PurchaseDate).AddMonths(-3);
+
+                var fromDatePurchase = DateTime.Now.AddMonths(-3);
 
                 var rawResult = _dbService.GetAllPurchase()
                                 .Where(pur => pur.CustomerId == customerId && pur.PurchaseDate > fromDatePurchase)
@@ -181,7 +186,9 @@ namespace CCMPreparation.Controllers
             _logger.LogInformation("CustomerController:Method:GetUniqueCustomerInteractedInLast3Month called.");
             try
             {
-                var fromDatePurchase = _dbService.GetAllCustomerActivity().Max(sup => sup.ActivityDate).AddMonths(-3);
+                //var fromDatePurchase = _dbService.GetAllCustomerActivity().Max(sup => sup.ActivityDate).AddMonths(-3); 
+
+                var fromDatePurchase = DateTime.Now.AddMonths(-3);
 
                 var rawResult = _dbService.GetAllCustomerActivity()
                                 .Where(pur => pur.ActivityDate > fromDatePurchase)
@@ -215,7 +222,9 @@ namespace CCMPreparation.Controllers
             _logger.LogInformation("CustomerController:Method:GetMostActiveCustomerInLast3Month called.");
             try
             {
-                var fromDatePurchase = _dbService.GetAllCustomerActivity().Max(sup => sup.ActivityDate).AddMonths(-3);
+                //var fromDatePurchase = _dbService.GetAllCustomerActivity().Max(sup => sup.ActivityDate).AddMonths(-3);
+
+                var fromDatePurchase = DateTime.Now.AddMonths(-3);
 
                 var rawResult = _dbService.GetAllCustomerActivity()
                                 .Where(pur => pur.ActivityDate > fromDatePurchase)
@@ -244,7 +253,7 @@ namespace CCMPreparation.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, json);
             }
         }
-         
+
         public static string GetLoyaltyTier(IGrouping<object, CustomerActivity> loyalty)
         {
             //            -Platinum(12 or more purchases per year)

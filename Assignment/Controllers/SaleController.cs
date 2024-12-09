@@ -114,7 +114,8 @@ namespace CCMPreparation.Controllers
                     return BadRequest();
                 }
 
-                var fromDate = new DateTime(year, 12, 31).AddMonths(-6);
+                // var fromDate = new DateTime(year, 12, 31).AddMonths(-6);
+                var fromDate = DateTime.Now.AddMonths(-6);
 
                 var rawResult = _dbService.GetAllSale()
                                    .Where(sale => sale.SaleDate.Year == year && sale.SaleDate > fromDate)
@@ -151,7 +152,9 @@ namespace CCMPreparation.Controllers
                     return BadRequest();
                 }
 
-                var fromDate = new DateTime(year, 12, 31).AddMonths(-6);
+                // var fromDate = new DateTime(year, 12, 31).AddMonths(-6);
+
+                var fromDate = DateTime.Now.AddMonths(-6);
 
                 var rawResult = _dbService.GetAllSale()
                                    .Where(sale => sale.SaleDate.Year == year && sale.SaleDate > fromDate)

@@ -198,7 +198,8 @@ namespace CCMPreparation.Controllers
             _logger.LogInformation("PurachesController:Method:GetCustomerMedianPurchaseAmtInLast3MonthOfYear called.");
             try
             {
-                var fromDatePurchase = _dbService.GetAllPurchase().Max(sup => sup.PurchaseDate).AddMonths(-3);
+                // var fromDatePurchase = _dbService.GetAllPurchase().Max(sup => sup.PurchaseDate).AddMonths(-3);
+                var fromDatePurchase = DateTime.Now.AddMonths(-3);
 
                 var rawResult1 = Helpers.GetMedianAmt(_dbService
                                                      .GetAllPurchase()
@@ -244,8 +245,8 @@ namespace CCMPreparation.Controllers
             _logger.LogInformation("PurachesController:Method:GetCustomerMadePurchasesInLast6MonthOfYear called.");
             try
             {
-                var fromDatePurchase = new DateTime(year, 12, 31).AddMonths(-6);
-
+                //var fromDatePurchase = new DateTime(year, 12, 31).AddMonths(-6);
+                var fromDatePurchase = DateTime.Now.AddMonths(-6);
 
                 var rawResult = _dbService.GetAllPurchase()
                                 .Where(pur => pur.PurchaseDate > fromDatePurchase)
@@ -338,7 +339,8 @@ namespace CCMPreparation.Controllers
             _logger.LogInformation("PurachesController:Method:GetTotalPurchasesMadeOnEachDaysInLast3Months called.");
             try
             {
-                var fromDate = _dbService.GetAllPurchase().Max(pur => pur.PurchaseDate).AddMonths(-3);
+                // var fromDate = _dbService.GetAllPurchase().Max(pur => pur.PurchaseDate).AddMonths(-3);
+                var fromDate = DateTime.Now.AddMonths(-3);
 
                 var rawResult = _dbService.GetAllPurchase()
                                 .Where(pur => pur.PurchaseDate > fromDate)

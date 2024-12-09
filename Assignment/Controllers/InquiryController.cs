@@ -36,7 +36,9 @@ namespace Assignment.Controllers
             _logger.LogInformation("InquiryController:Method:GetProductCategoryWithHighestNoOfInquiryInLast3Month called.");
             try
             {
-                var fromDate = _dbService.GetAllInquiry().Max(inq => inq.InquiryDate).AddMonths(-3);
+                //var fromDate = _dbService.GetAllInquiry().Max(inq => inq.InquiryDate).AddMonths(-3);
+
+                var fromDate = DateTime.Now.AddMonths(-3);
 
                 var rawResult = _dbService.GetAllInquiry()
                                  .Where(get => get.InquiryDate > fromDate)
@@ -79,7 +81,9 @@ namespace Assignment.Controllers
             _logger.LogInformation("InquiryController:Method:GetAllCategoryTotalNoOfInquiryInLast3Month called.");
             try
             {
-                var fromDate = _dbService.GetAllInquiry().Max(inq => inq.InquiryDate).AddMonths(-3);
+                //var fromDate = _dbService.GetAllInquiry().Max(inq => inq.InquiryDate).AddMonths(-3);
+
+                var fromDate = DateTime.Now.AddMonths(-3);
 
                 var rawResult = _dbService.GetAllInquiry()
                                  .Where(get => get.InquiryDate > fromDate)
@@ -120,7 +124,9 @@ namespace Assignment.Controllers
             _logger.LogInformation("InquiryController:Method:GetDateWithHighestNoOfInquiryInYear called.");
             try
             {
-                var fromDate = _dbService.GetAllInquiry().Max(inq => inq.InquiryDate).AddMonths(-3);
+                // var fromDate = _dbService.GetAllInquiry().Max(inq => inq.InquiryDate).AddMonths(-3);
+
+                var fromDate = DateTime.Now.AddMonths(-3);
 
                 var rawResult = _dbService.GetAllInquiry()
                                 .Where(get => get.InquiryDate.Year == year)
