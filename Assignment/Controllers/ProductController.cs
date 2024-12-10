@@ -38,42 +38,15 @@ namespace Assignment.Controllers
                 var responseResult = await _externalApiService.GetProductsAsync(uri);
 
                 var jsonObject = JsonSerializer.Deserialize<List<ProductExternal>>(responseResult);
-                 
+
                 return Ok(jsonObject);
             }
             catch (Exception ex)
             {
                 _logger.LogError("ProductController:GetProductsAsync Error:{ex}", ex);
-                var json = JsonSerializer.Serialize(ex);
                 return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
-
-
-        //// GET api/<ProductController>/5
-        //[HttpGet("{id}")]
-        //public string Get(int id)
-        //{
-        //    return "value";
-        //}
-
-        //// POST api/<ProductController>
-        //[HttpPost]
-        //public void Post([FromBody] string value)
-        //{
-        //}
-
-        //// PUT api/<ProductController>/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
-
-        //// DELETE api/<ProductController>/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
     }
 
 

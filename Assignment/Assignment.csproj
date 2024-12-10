@@ -21,4 +21,12 @@
     <ProjectReference Include="..\EmployeeManagement.Service\EmployeeManagement.Service.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EditorConfigFiles Remove="C:\Users\omkar.vishwakarma\source\repos\Assignment\Assignment\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="C:\Users\omkar.vishwakarma\source\repos\Assignment\Assignment\.editorconfig" />
+  </ItemGroup>
+
 </Project>

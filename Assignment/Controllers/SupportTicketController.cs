@@ -12,12 +12,12 @@ namespace Assignment.Controllers
     [ApiController]
     public class SupportTicketController : ControllerBase
     {
-        private readonly DbService _dbService;
+        private readonly IDbSupportTicketService _dbSupportTicketService;
         private readonly ILogger<SupportTicketController> _logger;
 
-        public SupportTicketController(DbService dbService, ILogger<SupportTicketController> logger)
+        public SupportTicketController(IDbSupportTicketService dbSupportTicketService, ILogger<SupportTicketController> logger)
         {
-            _dbService = dbService;
+            _dbSupportTicketService = dbSupportTicketService;
             _logger = logger;
         }
 
@@ -36,14 +36,7 @@ namespace Assignment.Controllers
             _logger.LogInformation("SupportTicketController:Method:GetDuplicateSupportActivity called.");
             try
             {
-                var rawResult = _dbService.GetAllSupportTicket()
-                    .GroupBy(supp => new { supp.Category, supp.SupportDateTime.Month })
-                    .Select(supp => new
-                    {
-                        ticketname = supp.Key.Category,
-                        month = supp.Key.Month,
-                        duplicatecount = supp.Count()
-                    });
+                var rawResult = _dbSupportTicketService.GetDuplicateSupportActivity();
 
                 if (rawResult.Any())
                 {
@@ -55,10 +48,7 @@ namespace Assignment.Controllers
             catch (Exception ex)
             {
                 _logger.LogError("SupportTicketController:Method:GetDuplicateSupportActivity Error: {ex}", ex);
-
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 
@@ -69,33 +59,11 @@ namespace Assignment.Controllers
             _logger.LogInformation("SupportTicketController:Method:GetSupportTicketsAverageInLast3Month called.");
             try
             {
-                // var fromDate = _dbService.GetAllSupportTicket().Max(sup => sup.SupportDateTime).AddMonths(-3);
-
-                var fromDate = DateTime.Now.AddMonths(-3);
-
-                var rawResult1 = _dbService.GetAllSupportTicket()
-                    .Where(supp => supp.SupportDateTime > fromDate)
-                    .GroupBy(group => group.SupportDateTime.Month)
-                    .Select(sup => new
-                    {
-                        month = sup.Key,
-                        ticket = sup.Count()
-                    })
-                    .Average(tic => tic.ticket);
-
-                var rawResult = _dbService.GetAllSupportTicket()
-                     .Where(supp => supp.SupportDateTime > fromDate)
-                     .GroupBy(group => group.SupportDateTime.Month)
-                     .Select(sup => new
-                     {
-                         month = sup.Key,
-                         ticket = sup.Count()
-                     });
+                var rawResult = _dbSupportTicketService.GetSupportTicketsAverageInLast3Month();
 
                 return Ok(new
                 {
-                    message = $"Support Tickets Average In Last 3 Month:{rawResult1}",
-                    rawResult
+                    message = $"Support Tickets Average In Last 3 Month:{rawResult}"
                 });
 
                 //return NotFound(new { message = "No data found for customer." });
@@ -103,10 +71,7 @@ namespace Assignment.Controllers
             catch (Exception ex)
             {
                 _logger.LogError("SupportTicketController:Method:GetSupportTicketsAverageInLast3Month Error: {ex}", ex);
-
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 
@@ -117,18 +82,8 @@ namespace Assignment.Controllers
             _logger.LogInformation("SupportTicketController:Method:GetSupportTicketsTotalNoPerCategoryInLast3Month called.");
             try
             {
-                //  var fromDate = _dbService.GetAllSupportTicket().Max(sup => sup.SupportDateTime).AddMonths(-3);
 
-                var fromDate = DateTime.Now.AddMonths(-3);
-
-                var rawResult = _dbService.GetAllSupportTicket()
-                    .Where(supp => supp.SupportDateTime > fromDate)
-                    .GroupBy(group => group.Category)
-                     .Select(sup1 => new
-                     {
-                         category = sup1.Key,
-                         ticketCount = sup1.Count()
-                     });
+                var rawResult = _dbSupportTicketService.GetSupportTicketsTotalNoPerCategoryInLast3Month();
 
                 if (rawResult.Any())
                     return Ok(new { rawResult });
@@ -138,10 +93,7 @@ namespace Assignment.Controllers
             catch (Exception ex)
             {
                 _logger.LogError("SupportTicketController:Method:GetSupportTicketsTotalNoPerCategoryInLast3Month Error: {ex}", ex);
-
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 
@@ -152,33 +104,18 @@ namespace Assignment.Controllers
             _logger.LogInformation("SupportTicketController:Method:GetSupportTicketsTotalNoPerMonthInLast3Month called.");
             try
             {
-                // var fromDate = _dbService.GetAllSupportTicket().Max(sup => sup.SupportDateTime).AddMonths(-3);
+                var rawResult = _dbSupportTicketService.GetSupportTicketsTotalInLast3Month();
 
-                var fromDate = DateTime.Now.AddMonths(-3);
+                return Ok(new
+                {
+                    rawResult
+                });
 
-                var rawResult = _dbService.GetAllSupportTicket()
-                                .Where(supp => supp.SupportDateTime > fromDate)
-                                .GroupBy(group => group.SupportDateTime.Month)
-                                .Select(sup => new
-                                {
-                                    month = sup.Key,
-                                    ticket = sup.Count()
-                                });
-                if (rawResult.Any())
-                    return Ok(new
-                    {
-                        rawResult
-                    });
-
-                return NotFound(new { message = "No data found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError("SupportTicketController:Method:GetSupportTicketsTotalNoPerMonthInLast3Month Error: {ex}", ex);
-
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 
@@ -189,20 +126,11 @@ namespace Assignment.Controllers
             _logger.LogInformation("SupportTicketController:Method:GetSupportTicketsAveragePerMonth called.");
             try
             {
-                var rawResult = _dbService.GetAllSupportTicket()
-                    .GroupBy(group => group.SupportDateTime.Month)
-                    .Select(sup => new
-                    {
-                        month = sup.Key,
-                        ticket = sup.Count()
-                    });
-
-                var result = rawResult.Average(tic => tic.ticket);
+                var rawResult = _dbSupportTicketService.GetSupportTicketsAveragePerMonth();
 
                 return Ok(new
                 {
-                    rawResult = rawResult,
-                    message = $"Support Tickets Average Per Month:{result}"
+                    message = $"Support Tickets Average Per Month:{rawResult}"
                 });
 
                 //return NotFound(new { message = "No data found for customer." });
@@ -210,10 +138,7 @@ namespace Assignment.Controllers
             catch (Exception ex)
             {
                 _logger.LogError("SupportTicketController:Method:GetSupportTicketsAveragePerMonth Error: {ex}", ex);
-
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 
@@ -224,32 +149,21 @@ namespace Assignment.Controllers
             _logger.LogInformation("SupportTicketController:Method:GetMajorSupportTicketCountAndStatus called.");
             try
             {
-                var rawResult = _dbService.GetAllSupportTicket()
-                      .GroupBy(supp => new { supp.Category, supp.SupportDateTime.Month })
-                      .Select(supp => new
-                      {
-                          ticketname = supp.Key.Category,
-                          ticketmonth = supp.Key.Month,
-                          ticketcount = supp.Count(),
-                          ticketstatus = GetStatus(supp)
-                      });
+                var rawResult = _dbSupportTicketService.GetMajorSupportTicketCountAndStatus();
 
+                if (rawResult.Any())
+                    return Ok(new
+                    {
+                        rawResult = rawResult,
+                        // message = $"Support Tickets Average Per Month:{result}"
+                    });
 
-                return Ok(new
-                {
-                    rawResult = rawResult,
-                    // message = $"Support Tickets Average Per Month:{result}"
-                });
-
-                //return NotFound(new { message = "No data found for customer." });
+                return NotFound(new { message = "No data found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError("SupportTicketController:Method:GetMajorSupportTicketCountAndStatus Error: {ex}", ex);
-
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
 
         }
@@ -261,68 +175,20 @@ namespace Assignment.Controllers
             _logger.LogInformation("SupportTicketController:Method:GetHighestNoSupportTicketsMonthOfYear called.");
             try
             {
-                var rawResult = _dbService.GetAllSupportTicket()
-                      .Where(tick => tick.SupportDateTime.Year == year)
-                      .GroupBy(supp => supp.SupportDateTime.Month)
-                      .Select(supp => new
-                      {
-                          ticketmonth = supp.Key,
-                          ticketcount = supp.Count()
-                      })
-                      .OrderByDescending(high => high.ticketcount);
+                var rawResult = _dbSupportTicketService.GetHighestNoSupportTicketsMonthOfYear(year);
 
-                if (rawResult.Any())
-                    return Ok(new { MonthWithHighestNoOfSupportTickets = rawResult.MaxBy(tic => tic.ticketcount)?.ticketmonth, rawResult });
+                if (rawResult != null)
+                    return Ok(new { MonthWithHighestNoOfSupportTickets = rawResult });
 
                 return NotFound(new { message = "No data found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError("SupportTicketController:Method:GetHighestNoSupportTicketsMonthOfYear Error: {ex}", ex);
-
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 
-        private static string GetStatus(IGrouping<object, SupportTicket> supp)
-        {
-            int itemCount = supp.Count();
 
-            if (itemCount <= 10)
-            {
-                return itemCount == 10 ? "Major" : "Minor";
-            }
-            else
-            {
-                return "Critical";
-            }
-        }
-
-        //// GET api/<SupportTicketController>/5
-        //[HttpGet("{id}")]
-        //public string Get(int id)
-        //{
-        //    return "value";
-        //}
-
-        //// POST api/<SupportTicketController>
-        //[HttpPost]
-        //public void Post([FromBody] string value)
-        //{
-        //}
-
-        //// PUT api/<SupportTicketController>/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
-
-        //// DELETE api/<SupportTicketController>/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
     }
 }

@@ -1,4 +1,5 @@
-﻿using EmployeeManagement.Data;
+﻿using Common;
+using EmployeeManagement.Data;
 using EmployeeManagement.Service;
 using Microsoft.AspNetCore.Mvc;
 

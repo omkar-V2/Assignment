@@ -25,6 +25,12 @@ try
     // Add services to the container. 
     builder.Services.AddScoped<IEmployeeService, EmployeeService>();
     builder.Services.AddScoped<DbService>();
+    builder.Services.AddScoped<IDbOrderService, DbOrderService>();
+    builder.Services.AddScoped<IDbPurchaseService, DbPurchaseService>();
+    builder.Services.AddScoped<IDbInquiryService, DbInquiryService>();
+    builder.Services.AddScoped<IDbSupportTicketService, DbSupportTicketService>();
+
+
     builder.Services.AddTransient<ExternalApiService>();
     builder.Services.AddSingleton<IEmployeeRepository, EmployeeRepository>();
 

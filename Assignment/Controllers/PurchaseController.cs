@@ -1,9 +1,11 @@
-﻿using EmployeeManagement.Data;
+﻿using Common;
+using EmployeeManagement.Data;
 using EmployeeManagement.Service;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using static CCMPreparation.Controllers.OrderController;
+using static Common.Helpers;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -13,12 +15,12 @@ namespace CCMPreparation.Controllers
     [ApiController]
     public class PurchaseController : ControllerBase
     {
-        private readonly DbService _dbService;
+        private readonly IDbPurchaseService _purchaseService;
         private readonly ILogger<OrderController> _logger;
 
-        public PurchaseController(DbService dbService, ILogger<OrderController> logger)
+        public PurchaseController(IDbPurchaseService purchaseService, ILogger<OrderController> logger)
         {
-            _dbService = dbService;
+            _purchaseService = purchaseService;
             _logger = logger;
         }
 
@@ -26,14 +28,14 @@ namespace CCMPreparation.Controllers
         [HttpGet]
         public IEnumerable<Purchase> Get()
         {
-            return _dbService.GetAllPurchase();
+            return _purchaseService.GetAllPurchase();
         }
 
         // GET api/<Purchase>/5
         [HttpGet("{customerId}")]
         public IEnumerable<Purchase> GetPurchaseByCustomerID(string customerId)
         {
-            return _dbService.GetAllPurchase().Where(pur => pur.CustomerId == customerId);
+            return _purchaseService.GetPurchaseByCustomerID(customerId);
         }
 
         // GET api/<Purchase>/year/2023
@@ -41,56 +43,14 @@ namespace CCMPreparation.Controllers
         public IEnumerable<object> GetCustomerExpenditureByYear(int year)
         {
 
-            var nestedGroupsQuery = _dbService.GetAllPurchase()
-             .GroupBy(pur => pur.PurchaseDate.Year == year)
-             .Select(newGroup1 => new
-             {
-                 newGroup1.Key,
-                 NestedGroup = newGroup1.GroupBy(group => group.CustomerId)
-             });
-
-            foreach (var outerGroup in nestedGroupsQuery)
-            {
-                Console.WriteLine($"outerGroup key type= {outerGroup.Key.GetType()} value= {outerGroup.Key}");
-                foreach (var innerGroup in outerGroup.NestedGroup)
-                {
-                    Console.WriteLine($"innerGroup key type= {innerGroup.Key.GetType()} value= {innerGroup.Key}");
-                    Console.WriteLine($"innerGroup Amount   value= {innerGroup.Sum(pur => pur.Amount)}");
-
-                    foreach (var innerGroupElement in innerGroup)
-                    {
-                        Console.WriteLine($"innerGroup Customer= {innerGroupElement.CustomerId} Amount= {innerGroupElement.Amount}");
-                    }
-                }
-            }
-
-            return _dbService.GetAllPurchase()
-                .Where(pur => pur.PurchaseDate.Year == year)
-                .GroupBy(group => group.CustomerId)
-                .Select(customergroup => new
-                {
-                    customer = customergroup.Key,
-                    TotalAmount = customergroup.Sum(pur => pur.Amount)
-                });
+            return _purchaseService.GetCustomerExpenditureByYear(year);
         }
 
         // GET api/<Purchase>/month/2023
         [HttpGet("month/{year}")]
         public IEnumerable<object> GetTopCustomerWithHighExpenditureByMonthOfYear(int year)
         {
-            var rawResult = _dbService.GetAllPurchase()
-             .Where(pur => pur.PurchaseDate.Year == year)
-             .GroupBy(group => new { group.PurchaseDate.Month, group.CustomerId })
-             .Select(customergroup => new
-             {
-                 Month = customergroup.Key.Month,
-                 Customer = customergroup.Key.CustomerId,
-                 TotalAmnt = customergroup.Sum(group => group.Amount)
-             });
-
-            var result = rawResult.GroupBy(month => month.Month)
-                                  .Select(g => g.OrderByDescending(t => t.TotalAmnt).First())
-                                  .OrderBy(ord => ord.Month);
+            var result = _purchaseService.GetTopCustomerWithHighExpenditureByMonthOfYear(year);
 
             return result;
         }
@@ -108,10 +68,8 @@ namespace CCMPreparation.Controllers
                     return BadRequest();
                 }
 
+                var rawResult = _purchaseService.GetCustomerPurchasHistory(customerId);
 
-                var rawResult = _dbService.GetAllPurchase()
-                               .Where(cust => cust.CustomerId == customerId)
-                               .OrderBy(cus => cus.PurchaseDate);
                 if (rawResult.Any())
                 {
                     return Ok(rawResult);
@@ -134,15 +92,8 @@ namespace CCMPreparation.Controllers
 
             try
             {
-                var rawResult = _dbService.GetAllPurchase()
-                               .GroupBy(group => group.CustomerId)
-                               .Select(cus => new
-                               {
-                                   Customer = cus.Key,
-                                   Min = cus.Min(cus => cus.Amount),
-                                   Max = cus.Max(cus => cus.Amount),
-                                   Average = cus.Average(cus => cus.Amount)
-                               });
+                var rawResult = _purchaseService.GetCustomerMinMaxAveragePurchaseAmt();
+
                 if (rawResult.Any())
                 {
                     return Ok(rawResult);
@@ -168,14 +119,7 @@ namespace CCMPreparation.Controllers
                 {
                     return BadRequest();
                 }
-                var rawResult = _dbService.GetAllPurchase()
-                               .GroupBy(group => new { Year = group.PurchaseDate.Year, Month = group.PurchaseDate.Month })
-                               .Select(cus => new
-                               {
-                                   cus.Key.Year,
-                                   cus.Key.Month,
-                                   Average = cus.Average(cus => cus.Amount)
-                               });
+                var rawResult = _purchaseService.GetCustomerAveragePurchaseAmtByMonthOfYear(year);
 
                 if (rawResult.Any())
                 {
@@ -193,48 +137,21 @@ namespace CCMPreparation.Controllers
 
         // GET /api/Purchase/Customer/C001
         [HttpGet("GetCustomerMedianPurchaseAmtInLast3MonthOfYear")]
-        public ActionResult<IEnumerable<object>> GetCustomerMedianPurchaseAmtInLast3MonthOfYear()
+        public ActionResult<IEnumerable<object>> GetCustomerMedianPurchaseAmtInLast3Month()
         {
-            _logger.LogInformation("PurachesController:Method:GetCustomerMedianPurchaseAmtInLast3MonthOfYear called.");
+            _logger.LogInformation("PurachesController:Method:GetCustomerMedianPurchaseAmtInLast3Month called.");
             try
             {
-                // var fromDatePurchase = _dbService.GetAllPurchase().Max(sup => sup.PurchaseDate).AddMonths(-3);
-                var fromDatePurchase = DateTime.Now.AddMonths(-3);
+                var rawResult = _purchaseService.GetCustomerMedianPurchaseAmtInLast3Month();
 
-                var rawResult1 = Helpers.GetMedianAmt(_dbService
-                                                     .GetAllPurchase()
-                                                     .Where(pur => pur.PurchaseDate > fromDatePurchase)
-                                                     .Select(pur1 => pur1.Amount)
-                                                     .OrderBy(ord => ord));
+                return Ok($"Customer Median Purchase Amt In Last 3 Month Of Year:{rawResult}");
 
-                var rawResult = _dbService.GetAllPurchase()
-                                .GroupBy(group => new
-                                {
-                                    Year = group.PurchaseDate.Year,
-                                    Month = group.PurchaseDate.Month
-                                })
-                                .Select(cus => new
-                                {
-                                    cus.Key.Year,
-                                    cus.Key.Month,
-                                    ListedAmts = string.Join(",", cus.Select(amt => amt.Amount).Order())
-                                })
-                                .TakeLast(3);
-
-                if (rawResult.Any())
-                {
-                    return Ok(new { rawResult, message = $"Customer Median Purchase Amt In Last 3 Month Of Year:{rawResult1}" });
-                }
-
-                return NotFound(new { message = "No data found for customer." });
+                // return NotFound(new { message = "No data found for customer." });
             }
             catch (Exception ex)
             {
-                _logger.LogError("PurachesController:Method:GetCustomerMedianPurchaseAmtInLast3MonthOfYear Error: {ex}", ex);
-
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                _logger.LogError("PurachesController:Method:GetCustomerMedianPurchaseAmtInLast3Month Error: {ex}", ex);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 
@@ -245,16 +162,11 @@ namespace CCMPreparation.Controllers
             _logger.LogInformation("PurachesController:Method:GetCustomerMadePurchasesInLast6MonthOfYear called.");
             try
             {
-                //var fromDatePurchase = new DateTime(year, 12, 31).AddMonths(-6);
-                var fromDatePurchase = DateTime.Now.AddMonths(-6);
+                var rawResult = _purchaseService.GetCustomerMadePurchasesInLast6MonthOfYear(year);
 
-                var rawResult = _dbService.GetAllPurchase()
-                                .Where(pur => pur.PurchaseDate > fromDatePurchase)
-                                .Select(cus => cus.CustomerId)
-                                .Distinct();
                 if (rawResult.Any())
                 {
-                    return Ok($"Customer= {string.Join(",", rawResult)}");
+                    return Ok(rawResult);
                 }
 
                 return NotFound(new { message = "No data found for customer." });
@@ -262,10 +174,7 @@ namespace CCMPreparation.Controllers
             catch (Exception ex)
             {
                 _logger.LogError("PurachesController:Method:GetCustomerMadePurchasesInLast6MonthOfYear Error: {ex}", ex);
-
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 
@@ -276,15 +185,11 @@ namespace CCMPreparation.Controllers
             _logger.LogInformation("PurachesController:Method:GetCustomerMadePurchasesInYear called.");
             try
             {
-                var rawResult = _dbService.GetAllPurchase()
-                                .Where(pur => pur.PurchaseDate.Year == year)
-                                .OrderBy(month => month.PurchaseDate.Month)
-                                .Select(cus => cus.CustomerId)
-                                .Distinct();
+                var rawResult = _purchaseService.GetCustomerMadePurchasesInYear(year);
 
                 if (rawResult.Any())
                 {
-                    return Ok($"Customer= {string.Join(",", rawResult)}");
+                    return Ok(rawResult);
                 }
 
                 return NotFound(new { message = "No data found for customer." });
@@ -292,10 +197,7 @@ namespace CCMPreparation.Controllers
             catch (Exception ex)
             {
                 _logger.LogError("PurachesController:Method:GetCustomerMadePurchasesInYear Error: {ex}", ex);
-
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 
@@ -306,14 +208,7 @@ namespace CCMPreparation.Controllers
             _logger.LogInformation("PurachesController:Method:GetTotalPurchasesMadeOnEachDaysOfYear called.");
             try
             {
-                var rawResult = _dbService.GetAllPurchase()
-                                .Where(pur => pur.PurchaseDate.Year == year)
-                                .GroupBy(group => group.PurchaseDate.DayOfWeek)
-                                .Select(record => new
-                                {
-                                    Day = record.Key,
-                                    Count = record.Count()
-                                });
+                var rawResult = _purchaseService.GetTotalPurchasesMadeOnEachDaysOfYear(year);
 
                 if (rawResult.Any())
                 {
@@ -325,10 +220,7 @@ namespace CCMPreparation.Controllers
             catch (Exception ex)
             {
                 _logger.LogError("PurachesController:Method:GetTotalPurchasesMadeOnEachDaysOfYear Error: {ex}", ex);
-
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 
@@ -339,17 +231,8 @@ namespace CCMPreparation.Controllers
             _logger.LogInformation("PurachesController:Method:GetTotalPurchasesMadeOnEachDaysInLast3Months called.");
             try
             {
-                // var fromDate = _dbService.GetAllPurchase().Max(pur => pur.PurchaseDate).AddMonths(-3);
-                var fromDate = DateTime.Now.AddMonths(-3);
 
-                var rawResult = _dbService.GetAllPurchase()
-                                .Where(pur => pur.PurchaseDate > fromDate)
-                                .GroupBy(group => group.PurchaseDate.DayOfWeek)
-                                .Select(record => new
-                                {
-                                    Day = record.Key,
-                                    Count = record.Count()
-                                });
+                var rawResult = _purchaseService.GetTotalPurchasesMadeOnEachDaysInLast3Months();
 
                 if (rawResult.Any())
                 {
@@ -361,10 +244,7 @@ namespace CCMPreparation.Controllers
             catch (Exception ex)
             {
                 _logger.LogError("PurachesController:Method:GetTotalPurchasesMadeOnEachDaysInLast3Months Error: {ex}", ex);
-
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 
@@ -375,29 +255,15 @@ namespace CCMPreparation.Controllers
             _logger.LogInformation("PurachesController:Method:GetAveragePurchasesMadeOnEachDaysOfYear called.");
             try
             {
-                var rawResult = _dbService.GetAllPurchase()
-                                .Where(pur => pur.PurchaseDate.Year == year)
-                                .GroupBy(group => group.PurchaseDate.DayOfWeek)
-                                .Select(record => new
-                                {
-                                    Day = record.Key,
-                                    Average = record.Average(avg => avg.Amount)
-                                });
+                var rawResult = _purchaseService.GetAveragePurchasesMadeOnEachDaysOfYear(year);
 
-                if (rawResult.Any())
-                {
-                    return Ok(rawResult);
-                }
+                return Ok(new { message = $"Average purchase on each day of year:{rawResult}" });
 
-                return NotFound(new { message = "No data found for customer." });
             }
             catch (Exception ex)
             {
                 _logger.LogError("PurachesController:Method:GetAveragePurchasesMadeOnEachDaysOfYear Error: {ex}", ex);
-
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 
@@ -408,32 +274,15 @@ namespace CCMPreparation.Controllers
             _logger.LogInformation("PurachesController:Method:GetTotalPurchasesMadeOnWeekDaysOfYear called.");
             try
             {
-                var rawResult = _dbService.GetAllPurchase()
-                                .Where(pur => pur.PurchaseDate.Year == year &&
-                                 !(pur.PurchaseDate.DayOfWeek == DayOfWeek.Saturday || pur.PurchaseDate.DayOfWeek == DayOfWeek.Sunday))
-                                .Select(record => new
-                                {
-                                    amount = record.Amount,
-                                    orderTime = record.PurchaseDate,
-                                    customerId = record.CustomerId
-                                });
+                var rawResult = _purchaseService.GetTotalPurchasesMadeOnWeekDaysOfYear(year);
 
-                if (rawResult.Any())
-                {
-                    return Ok($"Total Purchase on WeekDays:{rawResult.Count()}");
-                    // return Ok(rawResult);
+                return Ok($"Total Purchase on WeekDays:{rawResult}");
 
-                }
-
-                return NotFound(new { message = "No data found for customer." });
             }
             catch (Exception ex)
             {
                 _logger.LogError("PurachesController:Method:GetTotalPurchasesMadeOnWeekDaysOfYear Error: {ex}", ex);
-
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 
@@ -445,32 +294,15 @@ namespace CCMPreparation.Controllers
             _logger.LogInformation("PurachesController:Method:GetTotalPurchasesMadeOnWeekendfYear called.");
             try
             {
-                var rawResult = _dbService.GetAllPurchase()
-                                .Where(pur => pur.PurchaseDate.Year == year &&
-                                 (pur.PurchaseDate.DayOfWeek == DayOfWeek.Saturday || pur.PurchaseDate.DayOfWeek == DayOfWeek.Sunday))
-                                .Select(record => new
-                                {
-                                    amount = record.Amount,
-                                    orderTime = record.PurchaseDate,
-                                    customerId = record.CustomerId
-                                });
+                var rawResult = _purchaseService.GetTotalPurchasesMadeOnWeekendfYear(year);
 
-                if (rawResult.Any())
-                {
-                    return Ok($"Total Purchase on Weekend:{rawResult.Count()}");
-                    //return Ok(rawResult);
+                return Ok($"Total Purchase on Weekend:{rawResult}");
 
-                }
-
-                return NotFound(new { message = "No data found for customer." });
             }
             catch (Exception ex)
             {
                 _logger.LogError("PurachesController:Method:GetTotalPurchasesMadeOnWeekendfYear Error: {ex}", ex);
-
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 
@@ -481,20 +313,11 @@ namespace CCMPreparation.Controllers
             _logger.LogInformation("PurachesController:Method:GetHighestPurchasesMadeInDayOfWeekOfYear called.");
             try
             {
-                var rawResult = _dbService.GetAllPurchase()
-                                .Where(ord => ord.PurchaseDate.Year == year)
-                                .GroupBy(group => group.PurchaseDate.DayOfWeek)
-                                .Select(result => new
-                                {
-                                    Day = result.Key,
-                                    PurchaseCount = result.Count()
-                                });
+                var rawResult = _purchaseService.GetHighestPurchasesMadeInDayOfWeekOfYear(year);
 
-                var finalResult = rawResult.Where(result => result.PurchaseCount == rawResult.Max(purcount => purcount.PurchaseCount));
-
-                if (finalResult.Any())
+                if (rawResult.Any())
                 {
-                    return Ok(finalResult);
+                    return Ok(rawResult);
                 }
 
                 return NotFound(new { message = "No data found for customer." });
@@ -502,10 +325,7 @@ namespace CCMPreparation.Controllers
             catch (Exception ex)
             {
                 _logger.LogError("PurachesController:Method:GetHighestPurchasesMadeInDayOfWeekOfYear Error: {ex}", ex);
-
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 
@@ -516,20 +336,11 @@ namespace CCMPreparation.Controllers
             _logger.LogInformation("PurachesController:Method:GetLowestPurchasesMadeInDayOfWeekOfYear called.");
             try
             {
-                var rawResult = _dbService.GetAllPurchase()
-                                .Where(ord => ord.PurchaseDate.Year == year)
-                                .GroupBy(group => group.PurchaseDate.DayOfWeek)
-                                .Select(result => new
-                                {
-                                    Day = result.Key,
-                                    PurchaseCount = result.Count()
-                                });
+                var rawResult = _purchaseService.GetLowestPurchasesMadeInDayOfWeekOfYear(year);
 
-                var finalResult = rawResult.Where(result => result.PurchaseCount == rawResult.Min(purcount => purcount.PurchaseCount));
-
-                if (finalResult.Any())
+                if (rawResult.Any())
                 {
-                    return Ok(finalResult);
+                    return Ok(rawResult);
                 }
 
                 return NotFound(new { message = "No data found for customer." });
@@ -537,10 +348,7 @@ namespace CCMPreparation.Controllers
             catch (Exception ex)
             {
                 _logger.LogError("PurachesController:Method:GetLowestPurchasesMadeInDayOfWeekOfYear Error: {ex}", ex);
-
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 
@@ -551,72 +359,17 @@ namespace CCMPreparation.Controllers
             _logger.LogInformation("PurachesController:Method:GetTotalPurchasesMadeInMonthOfYear called.");
             try
             {
-                var rawResult = _dbService.GetAllPurchase()
-                                .Count(pur => pur.PurchaseDate.Year == year
-                                 && pur.PurchaseDate.Month == month
-                                 && Helpers.GetTimeOftheDay(pur.PurchaseDate.TimeOfDay) == partOfDay);
+                var rawResult = _purchaseService.GetTotalPurchasesMadeInMonthOfYear(month, year, partOfDay);
 
-                if (rawResult > 0)
-                {
-                    return Ok($"Total Purchases= {rawResult}");
-                }
+                return Ok($"Total Purchases= {rawResult}");
 
-                return NotFound(new { message = "No data found for customer." });
             }
             catch (Exception ex)
             {
                 _logger.LogError("PurachesController:Method:GetTotalPurchasesMadeInMonthOfYear Error: {ex}", ex);
-
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 
-        //// GET /api/<Purchase>/year/2023
-        //[HttpGet("/year/{year}")]
-        //public ActionResult<IEnumerable<object>> GetMostSoldProductByYear(int year)
-        //{
-        //    _logger.LogInformation("PurchaseController:Method:GetMostSoldProductByYear Called");
-
-        //    try
-        //    {
-        //        var rawResult = _dbService.GetAllPurchase()
-        //                      .Where(yr => yr.PurchaseDate.Year == year)
-        //                      .GroupBy(group => new { Year = group.PurchaseDate.Year, Product=group.});
-
-
-
-        //        return Ok();
-
-
-        //        return NotFound();
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError("PurchaseController:Method:GetMostSoldProductByYear: {ex}", ex);
-        //        return StatusCode(StatusCodes.Status500InternalServerError, ex);
-        //    }
-
-        //}
-
-
-        //// POST api/<Purchase>
-        //[HttpPost]
-        //public void Post([FromBody] string value)
-        //{
-        //}
-
-        //// PUT api/<Purchase>/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
-
-        //// DELETE api/<Purchase>/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
     }
 }

@@ -12,12 +12,12 @@ namespace Assignment.Controllers
     [ApiController]
     public class InquiryController : ControllerBase
     {
-        private readonly DbService _dbService;
+        private readonly IDbInquiryService _dbInquiryService;
         private readonly ILogger<InquiryController> _logger;
 
-        public InquiryController(DbService dbService, ILogger<InquiryController> logger)
+        public InquiryController(IDbInquiryService dbInquiryService, ILogger<InquiryController> logger)
         {
-            _dbService = dbService;
+            _dbInquiryService = dbInquiryService;
             _logger = logger;
         }
 
@@ -36,25 +36,9 @@ namespace Assignment.Controllers
             _logger.LogInformation("InquiryController:Method:GetProductCategoryWithHighestNoOfInquiryInLast3Month called.");
             try
             {
-                //var fromDate = _dbService.GetAllInquiry().Max(inq => inq.InquiryDate).AddMonths(-3);
+                var rawResult = _dbInquiryService.GetProductCategoryWithHighestNoOfInquiryInLast3Month();
 
-                var fromDate = DateTime.Now.AddMonths(-3);
-
-                var rawResult = _dbService.GetAllInquiry()
-                                 .Where(get => get.InquiryDate > fromDate)
-                                 .GroupBy(group => new
-                                 {
-                                     product = group.CategoryName
-                                 })
-                                 .Select(inq1 => new
-                                 {
-                                     inq1.Key.product,
-                                     Quantity = inq1.Max(quant => quant.Quantity)
-                                 })
-                                 .OrderByDescending(inq => inq.Quantity);
-
-
-                if (rawResult.Any())
+                if (rawResult != null)
                     return Ok(new
                     {
                         rawResult
@@ -66,10 +50,7 @@ namespace Assignment.Controllers
             catch (Exception ex)
             {
                 _logger.LogError("InquiryController:Method:GetProductCategoryWithHighestNoOfInquiryInLast3Month Error: {ex}", ex);
-
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
 
         }
@@ -81,21 +62,8 @@ namespace Assignment.Controllers
             _logger.LogInformation("InquiryController:Method:GetAllCategoryTotalNoOfInquiryInLast3Month called.");
             try
             {
-                //var fromDate = _dbService.GetAllInquiry().Max(inq => inq.InquiryDate).AddMonths(-3);
 
-                var fromDate = DateTime.Now.AddMonths(-3);
-
-                var rawResult = _dbService.GetAllInquiry()
-                                 .Where(get => get.InquiryDate > fromDate)
-                                .GroupBy(group => new
-                                {
-                                    product = group.CategoryName
-                                })
-                                .Select(inq1 => new
-                                {
-                                    category = inq1.Key.product,
-                                    Quantity = inq1.Sum(quant => quant.Quantity)
-                                });
+                var rawResult = _dbInquiryService.GetAllCategoryTotalNoOfInquiryInLast3Month();
 
                 if (rawResult.Any())
                     return Ok(new
@@ -110,40 +78,19 @@ namespace Assignment.Controllers
             {
                 _logger.LogError("InquiryController:Method:GetAllCategoryTotalNoOfInquiryInLast3Month Error: {ex}", ex);
 
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
 
         }
 
         // GET api/<InquiryController>
         [HttpGet("GetDateWithHighestNoOfInquiryInYear/{year}")]
-        public ActionResult<IEnumerable<object>> GetDateWithHighestNoOfInquiryInYear(int year)
+        public ActionResult<object> GetDateWithHighestNoOfInquiryInYear(int year)
         {
             _logger.LogInformation("InquiryController:Method:GetDateWithHighestNoOfInquiryInYear called.");
             try
             {
-                // var fromDate = _dbService.GetAllInquiry().Max(inq => inq.InquiryDate).AddMonths(-3);
-
-                var fromDate = DateTime.Now.AddMonths(-3);
-
-                var rawResult = _dbService.GetAllInquiry()
-                                .Where(get => get.InquiryDate.Year == year)
-                                .GroupBy(group => new
-                                {
-                                    InqDate = group.InquiryDate.Date
-                                })
-                                .Select(inq1 => new
-                                {
-                                    Date = inq1.Key.InqDate,
-                                    QuantityNoOfinquiry = inq1.Max(high => high.Quantity)
-                                })
-                                .GroupBy(group => new
-                                {
-                                    inqcount = group.QuantityNoOfinquiry
-                                })
-                                .MaxBy(inq1 => inq1.Key.inqcount); ;
+                var rawResult = _dbInquiryService.GetDateWithHighestNoOfInquiryInYear(year);
 
                 if (rawResult != null)
                     return Ok(new
@@ -151,44 +98,16 @@ namespace Assignment.Controllers
                         rawResult
                     });
 
-
                 return NotFound(new { message = "No data found." });
             }
             catch (Exception ex)
             {
                 _logger.LogError("InquiryController:Method:GetDateWithHighestNoOfInquiryInYear Error: {ex}", ex);
 
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
 
         }
 
-
-        // GET api/<InquiryController>/5
-        //[HttpGet("{id}")]
-        //public string Get(int id)
-        //{
-        //    return "value";
-        //}
-
-        //// POST api/<InquiryController>
-        //[HttpPost]
-        //public void Post([FromBody] string value)
-        //{
-        //}
-
-        //// PUT api/<InquiryController>/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
-
-        //// DELETE api/<InquiryController>/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
     }
 }

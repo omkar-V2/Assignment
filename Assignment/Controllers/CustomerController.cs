@@ -58,10 +58,7 @@ namespace CCMPreparation.Controllers
             catch (Exception ex)
             {
                 _logger.LogError("CustomerController:Method:GetPurchaseAndOrderInfo Error: {ex}", ex);
-
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 
@@ -99,9 +96,7 @@ namespace CCMPreparation.Controllers
             {
                 _logger.LogError("CustomerController:Method:GetLast3MonthsCustomerOrderInfoOfPurchases Error: {ex}", ex);
 
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 
@@ -135,10 +130,7 @@ namespace CCMPreparation.Controllers
             catch (Exception ex)
             {
                 _logger.LogError("CustomerController:Method:GetLast3MonthsCustomerPurchaseInfo Error: {ex}", ex);
-
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 
@@ -172,10 +164,7 @@ namespace CCMPreparation.Controllers
             catch (Exception ex)
             {
                 _logger.LogError("CustomerController:Method:GetCustomerLoyaltyTiers Error: {ex}", ex);
-
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 
@@ -208,10 +197,7 @@ namespace CCMPreparation.Controllers
             catch (Exception ex)
             {
                 _logger.LogError("CustomerController:Method:GetUniqueCustomerInteractedInLast3Month Error: {ex}", ex);
-
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 
@@ -247,10 +233,7 @@ namespace CCMPreparation.Controllers
             catch (Exception ex)
             {
                 _logger.LogError("CustomerController:Method:GetMostActiveCustomerInLast3Month Error: {ex}", ex);
-
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 

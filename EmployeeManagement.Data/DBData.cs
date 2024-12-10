@@ -237,7 +237,20 @@ namespace EmployeeManagement.Data
         new Inquiry { CategoryName = "Clothing", Quantity = 95, InquiryDate = new DateTime(2023, 05, 01) },
         new Inquiry { CategoryName = "Home Appliances", Quantity = 115, InquiryDate = new DateTime(2023, 05, 01) },
         new Inquiry { CategoryName = "Toys", Quantity = 65, InquiryDate = new DateTime(2023, 05, 01) },
-        new Inquiry { CategoryName = "Books", Quantity = 40, InquiryDate = new DateTime(2023, 05, 01) }
+        new Inquiry { CategoryName = "Books", Quantity = 40, InquiryDate = new DateTime(2023, 05, 01) },
+              // Nov 2024
+        new Inquiry { CategoryName = "Electronics", Quantity = 125, InquiryDate = new DateTime(2024, 11, 01) },
+        new Inquiry { CategoryName = "Clothing", Quantity = 975, InquiryDate = new DateTime(2024, 11, 01) },
+        new Inquiry { CategoryName = "Home Appliances", Quantity = 115, InquiryDate = new DateTime(2024, 11, 01) },
+        new Inquiry { CategoryName = "Toys", Quantity = 63, InquiryDate = new DateTime(2024, 11, 01) },
+        new Inquiry { CategoryName = "Books", Quantity = 40, InquiryDate = new DateTime(2024, 11, 01) },
+
+        // Dec 2024
+        new Inquiry { CategoryName = "Electronics", Quantity = 125, InquiryDate = new DateTime(2024, 12, 01) },
+        new Inquiry { CategoryName = "Clothing", Quantity = 95, InquiryDate = new DateTime(2024, 12, 01) },
+        new Inquiry { CategoryName = "Home Appliances", Quantity = 116, InquiryDate = new DateTime(2024, 12, 01) },
+        new Inquiry { CategoryName = "Toys", Quantity = 65, InquiryDate = new DateTime(2024,12, 01) },
+        new Inquiry { CategoryName = "Books", Quantity = 44, InquiryDate = new DateTime(2024,12, 01) }
         ];
 
         public static readonly List<SupportTicket> MonthlySupportTickets =

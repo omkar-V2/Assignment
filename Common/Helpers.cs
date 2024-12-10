@@ -1,7 +1,4 @@
-﻿using EmployeeManagement.Data;
-using static CCMPreparation.Controllers.OrderController;
-
-namespace CCMPreparation
+﻿namespace Common
 {
     public static class Helpers
     {
@@ -51,6 +48,14 @@ namespace CCMPreparation
                 9 or 10 or 11 => "Autumn",
                 _ => throw new ArgumentOutOfRangeException()
             };
+        }
+
+        public enum PartOfDay
+        {
+            Morning,
+            Afternoon,
+            Evening,
+            Night
         }
     }
 }
