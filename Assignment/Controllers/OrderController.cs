@@ -49,7 +49,7 @@ namespace CCMPreparation.Controllers
 
                 if (rawResult.Any())
                 {
-                    return Ok($"Customer= {string.Join(",", rawResult)}");
+                    return Ok(rawResult);
                 }
 
                 return NotFound(new { message = "No data found for customer." });
@@ -77,7 +77,7 @@ namespace CCMPreparation.Controllers
 
                 if (rawResult.Any())
                 {
-                    return Ok($"Customer= {string.Join(",", rawResult)}");
+                    return Ok(rawResult);
                 }
 
                 return NotFound(new { message = "No data found for customer." });
@@ -116,9 +116,7 @@ namespace CCMPreparation.Controllers
             {
                 _logger.LogError("OrderController:Method:GetTotalNoOfOrderPlacedInLast3Month Error: {ex}", ex);
 
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 
@@ -145,10 +143,7 @@ namespace CCMPreparation.Controllers
             catch (Exception ex)
             {
                 _logger.LogError("OrderController:Method:GetTotalNoOfUniqueCustomersPlacedOrderInLast3Month Error: {ex}", ex);
-
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 
@@ -188,10 +183,7 @@ namespace CCMPreparation.Controllers
             catch (Exception ex)
             {
                 _logger.LogError("OrderController:Method:GetGroupOfCustomersPlacedOrderInLast3Month Error: {ex}", ex);
-
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 
@@ -202,7 +194,7 @@ namespace CCMPreparation.Controllers
             _logger.LogInformation("OrderController:Method:GetOrderCountPerMonthByYear called.");
             try
             {
-                var rawResult1 = _dbService.GetAllOrderIQ()
+                var rawResult = _dbService.GetAllOrderIQ()
                                 .Where(ord => ord.OrderDateTime.Year == year)
                                 .SelectMany(product => product.Products, (ord, product) => new
                                 {
@@ -227,9 +219,9 @@ namespace CCMPreparation.Controllers
                                .OrderBy(ord => ord.month);
 
 
-                if (rawResult1.Any())
+                if (rawResult.Any())
                 {
-                    return Ok(new { rawResult1 });
+                    return Ok(new { rawResult });
                 }
 
                 return NotFound(new { message = "No data found for customer." });
@@ -238,9 +230,7 @@ namespace CCMPreparation.Controllers
             {
                 _logger.LogError("OrderController:Method:GetOrderCountPerMonthByYear Error: {ex}", ex);
 
-                var json = JsonSerializer.Serialize(ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, json);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
 
@@ -266,22 +256,5 @@ namespace CCMPreparation.Controllers
         }
 
 
-        //// POST api/<OrderController>
-        //[HttpPost]
-        //public void Post([FromBody] string value)
-        //{
-        //}
-
-        //// PUT api/<OrderController>/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
-
-        //// DELETE api/<OrderController>/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
     }
 }
