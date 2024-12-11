@@ -11,12 +11,12 @@ namespace CCMPreparation.Controllers
     [ApiController]
     public class SaleController : ControllerBase
     {
-        private readonly DbService _dbService;
+        private readonly IDbSaleService _dbSaleService;
         private readonly ILogger<OrderController> _logger;
 
-        public SaleController(DbService dbService, ILogger<OrderController> logger)
+        public SaleController(IDbSaleService dbSaleService, ILogger<OrderController> logger)
         {
-            _dbService = dbService;
+            _dbSaleService = dbSaleService;
             _logger = logger;
         }
 
@@ -24,14 +24,14 @@ namespace CCMPreparation.Controllers
         [HttpGet]
         public IEnumerable<Sale> Get()
         {
-            return _dbService.GetAllSale();
+            return _dbSaleService.GetAllMonthlySales();
         }
 
         // GET api/<SaleController>/5
         [HttpGet("{ProductName}")]
         public IEnumerable<Sale> Get(string ProductName)
         {
-            return _dbService.GetAllSale().Where(sale => sale.ProductName == ProductName);
+            return _dbSaleService.GetProductMonthlySales(ProductName);
         }
 
 
@@ -49,14 +49,7 @@ namespace CCMPreparation.Controllers
                     return BadRequest();
                 }
 
-                var rawResult = _dbService.GetAllSale()
-                   .Where(sale => sale.SaleDate.Year == year && sale.SaleDate.Month <= 3)
-                   .GroupBy(group => new { group.ProductName })
-                   .Select(customergroup => new
-                   {
-                       Product = customergroup.Key.ProductName,
-                       TotalAmnt = customergroup.Sum(group => group.QuantitySold)
-                   }).Take(3);
+                var rawResult = _dbSaleService.GetTop3ProductsWithHighSalesForFirst3MonthsOfYear(year);
 
                 if (rawResult.Any())
                 {
@@ -74,7 +67,7 @@ namespace CCMPreparation.Controllers
         }
 
         //Get  api/<Sale>/month/2023
-        [HttpGet("year/{year}/month/{month}")]
+        [HttpGet("TotalOf/year/{year}/month/{month}")]
         public ActionResult<IEnumerable<object>> GetTotalSalesOfYearForMonth(int year, int month)
         {
             _logger.LogInformation("SaleController:Method:GetTotalSalesOfYearForMonth Called.");
@@ -86,10 +79,7 @@ namespace CCMPreparation.Controllers
                     return BadRequest();
                 }
 
-                var rawResult = _dbService.GetAllSale()
-                                .Where(sale => sale.SaleDate.Year == year && sale.SaleDate.Month == month)
-                                .Sum(quantity => quantity.QuantitySold);
-
+                var rawResult = _dbSaleService.GetTotalSalesOfYearForMonth(year, month);
 
                 return Ok($"Total Sales Of Year {year} For Month {month} is:{rawResult}");
 
@@ -115,19 +105,7 @@ namespace CCMPreparation.Controllers
                     return BadRequest();
                 }
 
-                // var fromDate = new DateTime(year, 12, 31).AddMonths(-6);
-                var fromDate = DateTime.Now.AddMonths(-6);
-
-                var rawResult = _dbService.GetAllSale()
-                                   .Where(sale => sale.SaleDate.Year == year && sale.SaleDate > fromDate)
-                                   .GroupBy(gr => gr.ProductName)
-                                   .Select(sales => new
-                                   {
-                                       Product = sales.Key,
-                                       TotalAmnt = sales.Sum(grp => grp.QuantitySold)
-                                   })
-                                   .OrderByDescending(pop => pop.TotalAmnt).First();
-
+                var rawResult = _dbSaleService.GetMostPopularProductInLast6MonthOfYear(year);
 
                 if (rawResult is not null) { return Ok(new { rawResult }); }
 
@@ -152,20 +130,8 @@ namespace CCMPreparation.Controllers
                 {
                     return BadRequest();
                 }
-
-                // var fromDate = new DateTime(year, 12, 31).AddMonths(-6);
-
-                var fromDate = DateTime.Now.AddMonths(-6);
-
-                var rawResult = _dbService.GetAllSale()
-                                   .Where(sale => sale.SaleDate.Year == year && sale.SaleDate > fromDate)
-                                   .GroupBy(gr => gr.ProductName)
-                                   .Select(sales => new
-                                   {
-                                       Product = sales.Key,
-                                       TotalAmnt = sales.Sum(grp => grp.QuantitySold)
-                                   })
-                                   .OrderBy(pop => pop.TotalAmnt).First();
+                 
+                var rawResult = _dbSaleService.GetLeastPopularProductInLast6MonthOfYear(year);
 
                 if (rawResult is not null) { return Ok(new { rawResult }); }
 
@@ -192,15 +158,7 @@ namespace CCMPreparation.Controllers
                     return BadRequest();
                 }
 
-                var rawResult = _dbService.GetAllSale()
-                                 .Where(sale => sale.SaleDate.Year == year)
-                                 .GroupBy(gr => gr.ProductName)
-                                 .Select(sales => new
-                                 {
-                                     Product = sales.Key,
-                                     TotalAmnt = sales.Sum(grp => grp.QuantitySold)
-                                 })
-                                 .OrderByDescending(pop => pop.TotalAmnt).First();
+                var rawResult = _dbSaleService.GetMostSoldProductByYear(year);
 
                 if (rawResult is not null)
                 { return Ok(rawResult); }
@@ -230,21 +188,7 @@ namespace CCMPreparation.Controllers
                     return BadRequest();
                 }
 
-
-                var rawResult = _dbService.GetAllSale()
-                              .Where(yr => yr.SaleDate.Year == year)
-                              .GroupBy(group => new
-                              {
-                                  Year = group.SaleDate.Year,
-                                  Product = group.ProductName
-                              })
-                              .Select(sold => new
-                              {
-                                  Year = sold.Key.Year,
-                                  Product = sold.Key.Product,
-                                  Sold = sold.Sum(sold => sold.QuantitySold)
-                              })
-                              .OrderBy(sold => sold.Sold).First();
+                var rawResult = _dbSaleService.GetLeastSoldProductByYear(year);
 
                 if (rawResult is not null)
                 { return Ok(rawResult); }
@@ -274,17 +218,7 @@ namespace CCMPreparation.Controllers
                     return BadRequest();
                 }
 
-                var rawResult = _dbService.GetAllSale()
-                              .Where(yr => yr.SaleDate.Year == year)
-                              .GroupBy(group => new
-                              {
-                                  Year = group.SaleDate.Year
-                              })
-                              .Select(sold => new
-                              {
-                                  Year = sold.Key.Year,
-                                  TotalQuantity = sold.Sum(sold => sold.QuantitySold)
-                              });
+                var rawResult = _dbSaleService.GetTotalProductQuantitySoldByYear(year);
 
                 if (rawResult is not null)
                 { return Ok(rawResult); }
@@ -313,29 +247,7 @@ namespace CCMPreparation.Controllers
                     return BadRequest();
                 }
 
-                var rawResult = _dbService.GetAllSale()
-                              .Where(yr => yr.SaleDate.Year == year)
-                              .GroupBy(group => new
-                              {
-                                  Year = group.SaleDate.Year,
-                                  Month = group.SaleDate.Month,
-                                  Product = group.ProductName
-                              })
-                              .Select(sold => new
-                              {
-                                  Year = sold.Key.Year,
-                                  Month = sold.Key.Month,
-                                  Product = sold.Key.Product,
-                                  TotalQuantity = sold.Sum(sold => sold.QuantitySold)
-                              })
-                              .GroupBy(group2 => new
-                              {
-                                  group2.Year,
-                                  group2.Month
-                              })
-                              .Select(result => result
-                                               .OrderByDescending(ord2 => ord2.TotalQuantity).First());
-
+                var rawResult = _dbSaleService.GetMostSoldProductMonthWiseOfYear(year);
 
                 if (rawResult is not null)
                 { return Ok(rawResult); }
@@ -357,44 +269,10 @@ namespace CCMPreparation.Controllers
 
             try
             {
-                if (top <= 0)
-                {
-                    var rawResult = _dbService.GetAllSale()
-                                    .GroupBy(group => Helpers.GetSeason(group.SaleDate))
-                                    .Select(result => new
-                                    {
-                                        Season = result.Key,
-                                        ProductSales = result.GroupBy(group1 => group1.ProductName)
-                                        .Select(newresult => new
-                                        {
-                                            Productname = newresult.Key,
-                                            TotalQuantity = newresult.Sum(quan => quan.QuantitySold)
-                                        })
-                                    });
+                var rawResult = _dbSaleService.GetProductGroupedBySeason(top);
 
-                    if (rawResult.Any())
-                        return Ok(rawResult);
-                }
-                else
-                {
-                    var rawResult = _dbService.GetAllSale()
-                                    .GroupBy(group => Helpers.GetSeason(group.SaleDate))
-                                    .Select(result => new
-                                    {
-                                        Season = result.Key,
-                                        ProductSales = result.GroupBy(group1 => group1.ProductName)
-                                        .Select(newresult => new
-                                        {
-                                            Productname = newresult.Key,
-                                            TotalQuantity = newresult.Sum(quan => quan.QuantitySold)
-                                        })
-                                        .OrderByDescending(result => result.TotalQuantity)
-                                        .Take(top)
-                                    });
-
-                    if (rawResult.Any())
-                        return Ok(rawResult);
-                }
+                if (rawResult.Any())
+                    return Ok(rawResult);
 
                 return NotFound("No Data Found");
             }
@@ -418,21 +296,9 @@ namespace CCMPreparation.Controllers
                     return BadRequest();
                 }
 
-                var rawResult = _dbService.GetAllSale()
-                              .Where(yr => yr.SaleDate.Year == year)
-                              .GroupBy(group => new
-                              {
-                                  Year = group.SaleDate.Year,
-                                  Month = group.SaleDate.Month
-                              })
-                              .Select(sold => new
-                              {
-                                  Year = sold.Key.Year,
-                                  Month = sold.Key.Month,
-                                  TotalAverage = sold.Average(sold => sold.QuantitySold)
-                              });
+                var rawResult = _dbSaleService.GetAveargeQuanOfProductSoldMonthWiseOfYear(year);
 
-                if (rawResult is not null)
+                if (rawResult.Any())
                 { return Ok(rawResult); }
 
                 return NotFound();
@@ -458,23 +324,7 @@ namespace CCMPreparation.Controllers
                 }
 
 
-                var rawResult = _dbService.GetAllSale()
-                              .Where(yr => yr.SaleDate.Year == year)
-                              .GroupBy(group => new
-                              {
-                                  Year = group.SaleDate.Year,
-                                  Product = group.ProductName
-                              })
-                              .Select(sold => new
-                              {
-                                  Year = sold.Key.Year,
-                                  Product = sold.Key.Product,
-                                  TotalSum = sold.Sum(sold => sold.QuantitySold),
-                                  TotalAverage = sold.Average(sold => sold.QuantitySold),
-                                  Min = sold.Min(sold => sold.QuantitySold),
-                                  Max = sold.Max(sold => sold.QuantitySold),
-                                  Count = sold.Count()
-                              });
+                var rawResult = _dbSaleService.GetAggregateOfEachProductSoldOfYear(year);
 
                 if (rawResult is not null)
                 { return Ok(rawResult); }
@@ -502,30 +352,9 @@ namespace CCMPreparation.Controllers
                     return BadRequest();
                 }
 
-                var rawResult = _dbService.GetAllSale()
-                              .Where(yr => yr.SaleDate.Year == year)
-                              .GroupBy(group => new
-                              {
-                                  Year = group.SaleDate.Year,
-                                  Month = group.SaleDate.Month,
-                                  Product = group.ProductName
-                              })
-                              .Select(sold => new
-                              {
-                                  Year = sold.Key.Year,
-                                  Month = sold.Key.Month,
-                                  Product = sold.Key.Product,
-                                  TotalQuantity = sold.Sum(sold => sold.QuantitySold)
-                              })
-                              .GroupBy(group2 => new
-                              {
-                                  group2.Year,
-                                  group2.Month
-                              })
-                              .Select(result => result
-                                               .OrderBy(ord2 => ord2.TotalQuantity).First());
+                var rawResult = _dbSaleService.GetLeastSoldProductMonthWiseOfYear(year);
 
-                if (rawResult is not null)
+                if (rawResult.Any())
                 { return Ok(rawResult); }
 
                 return NotFound();
@@ -537,22 +366,5 @@ namespace CCMPreparation.Controllers
             }
         }
 
-        //// POST api/<SaleController>
-        //[HttpPost]
-        //public void Post([FromBody] string value)
-        //{
-        //}
-
-        //// PUT api/<SaleController>/5
-        //[HttpPut("{id}")]
-        //public void Put(int id, [FromBody] string value)
-        //{
-        //}
-
-        //// DELETE api/<SaleController>/5
-        //[HttpDelete("{id}")]
-        //public void Delete(int id)
-        //{
-        //}
     }
 }
