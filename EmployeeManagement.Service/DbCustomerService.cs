@@ -61,7 +61,6 @@ namespace EmployeeManagement.Service
                    })
                    .Select(result => new
                    {
-                       year = result.Key.Year,
                        customer = result.Key.CustomerId,
                        loyaltytier = GetLoyaltyTier(result)
                    });

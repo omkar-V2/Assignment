@@ -80,29 +80,39 @@ namespace EmployeeManagement.Service
         public IEnumerable<object> GetMajorSupportTicketCountAndStatus()
         {
             return DBData.MonthlySupportTickets
-                    .GroupBy(supp => new { supp.Category, supp.SupportDateTime.Month })
+                    .GroupBy(supp => new { supp.Category }) //, supp.SupportDateTime.Month 
                       .Select(supp => new
                       {
-                          ticketname = supp.Key.Category,
-                          ticketmonth = supp.Key.Month,
-                          ticketcount = supp.Count(),
-                          ticketstatus = GetStatus(supp)
+                          categoryname = supp.Key.Category,
+                          //ticketmonth = supp.Key.Month,
+                          occurrence = supp.Count(),
+                          critical = GetStatus(supp)
                       });
 
         }
 
-        private static string GetStatus(IGrouping<object, SupportTicket> supp)
+        private static bool GetStatus(IGrouping<object, SupportTicket> supp)
         {
             int itemCount = supp.Count();
 
-            if (itemCount <= 10)
+
+            if (itemCount > 70)
             {
-                return itemCount == 10 ? "Major" : "Minor";
+                return true;
             }
             else
             {
-                return "Critical";
+                return false;
             }
+
+            //if (itemCount <= 10)
+            //{
+            //    return itemCount == 10 ? "Major" : "Minor";
+            //}
+            //else
+            //{
+            //    return "Critical";
+            //}
         }
 
 

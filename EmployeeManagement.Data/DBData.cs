@@ -118,7 +118,7 @@ namespace EmployeeManagement.Data
             new Product("P009", "Table Lamp", 45.00, "Home Goods")
         ], new DateTime(2024, 01, 05, 21, 00, 00)), // Evening, 2024
     
-        new Order("O005", "C005",
+        new Order("O005", "C005",   
         [
             new Product("P010", "Bookshelf", 150.00, "Home Goods"),
             new Product("P011", "Desk", 300.00, "Home Goods")
@@ -355,33 +355,7 @@ namespace EmployeeManagement.Data
         new CustomerActivity("C003", new DateTime(2023, 07, 20)),
         new CustomerActivity("C003", new DateTime(2023, 11, 15)),
         new CustomerActivity("C004", new DateTime(2023, 04, 15)),
-        new CustomerActivity("C004", new DateTime(2023, 08, 05)),
-
-        new CustomerActivity("C001", new DateTime(2024, 01, 05)),
-        new CustomerActivity("C001", new DateTime(2024, 02, 10)),
-        new CustomerActivity("C001", new DateTime(2024, 03, 15)),
-        new CustomerActivity("C001", new DateTime(2024, 05, 20)),
-        new CustomerActivity("C001", new DateTime(2024, 07, 25)),
-        new CustomerActivity("C001", new DateTime(2024, 09, 15)),
-        new CustomerActivity("C001", new DateTime(2024, 11, 05)),
-        new CustomerActivity("C002", new DateTime(2024, 01, 05)),
-        new CustomerActivity("C002", new DateTime(2024, 02, 10)),
-        new CustomerActivity("C002", new DateTime(2024, 03, 15)),
-        new CustomerActivity("C002", new DateTime(2024, 04, 20)),
-        new CustomerActivity("C002", new DateTime(2024, 05, 25)),
-        new CustomerActivity("C002", new DateTime(2024, 06, 15)),
-        new CustomerActivity("C002", new DateTime(2024, 07, 05)),
-        new CustomerActivity("C002", new DateTime(2024, 08, 10)),
-        new CustomerActivity("C002", new DateTime(2024, 09, 20)),
-        new CustomerActivity("C002", new DateTime(2024, 10, 15)),
-        new CustomerActivity("C002", new DateTime(2024, 11, 25)),
-        new CustomerActivity("C002", new DateTime(2024, 12, 05)),
-        new CustomerActivity("C003", new DateTime(2024, 02, 05)),
-        new CustomerActivity("C003", new DateTime(2024, 05, 10)),
-        new CustomerActivity("C003", new DateTime(2024, 07, 20)),
-        new CustomerActivity("C003", new DateTime(2024, 11, 15)),
-        new CustomerActivity("C004", new DateTime(2024, 04, 15)),
-        new CustomerActivity("C004", new DateTime(2024, 08, 05))
+        new CustomerActivity("C004", new DateTime(2023, 08, 05)), 
 
     };
     }

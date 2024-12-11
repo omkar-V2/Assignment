@@ -1,4 +1,5 @@
-﻿using EmployeeManagement.Data;
+﻿using System.Linq;
+using EmployeeManagement.Data;
 using static Common.Helpers;
 
 namespace EmployeeManagement.Service
@@ -30,21 +31,38 @@ namespace EmployeeManagement.Service
                                 .Distinct();
         }
 
-        public int GetTotalNoOfOrderPlacedInLast3Month()
+        public IEnumerable<object> GetTotalNoOfOrderPlacedInLast3Month()
         {
             var fromDate = DateTime.Now.AddMonths(-3);
 
-            return DBData.Orders.Count(get => get.OrderDateTime > fromDate);
+            return DBData.Orders
+                .Where(get => get.OrderDateTime > fromDate)
+                .SelectMany(prod => prod.Products, (ord, prod) => new
+                {
+                    productId = prod.ProductID,
+                    productName = prod.Title,
+                    OrderMonth = ord.OrderDateTime.ToString("MMMM")
+                })
+                .GroupBy(group => new { group.productId, group.productName })
+                .Select(sel => new
+                {
+                    sel.Key.productId,
+                    sel.Key.productName,
+                    monthlyOrders = sel.GroupBy(x => new { x.OrderMonth })
+                                       .ToDictionary(
+                                         x => $"{x.Key.OrderMonth}",
+                                         x => x.Count()
+                                        )
+                });
         }
 
-        public int GetTotalNoOfUniqueCustomersPlacedOrderInLast3Month()
+        public IEnumerable<object> GetTotalNoOfUniqueCustomersPlacedOrderInLast3Month()
         {
             var fromDate = DateTime.Now.AddMonths(-3);
 
             return DBData.Orders.Where(get => get.OrderDateTime > fromDate)
                                 .Select(ord => ord.CustomerId)
-                                .Distinct()
-                                .Count();
+                                .Distinct();
         }
 
         public IEnumerable<object> GetGroupOfCustomersPlacedOrderInLast3Month()
@@ -87,8 +105,8 @@ namespace EmployeeManagement.Service
                          {
                              year = result.Key.orderyear,
                              month = result.Key.ordermonth,
-                             //product = result.GroupBy(prd => prd.product)
-                             //         .Select(ord => new { Title = ord.Key, ProdCount = ord.Count() }),
+                             product = result.GroupBy(prd => prd.product)
+                                      .Select(ord => new { Title = ord.Key, ProdCount = ord.Count() }),
                              totalproductcount = result.Count()
                          })
                         .OrderBy(ord => ord.month);

@@ -13,10 +13,10 @@ namespace CCMPreparation.Controllers
     [ApiController]
     public class CustomerController : ControllerBase
     {
-        private readonly DbCustomerService _dbCustomerService;
+        private readonly IDbCustomerService _dbCustomerService;
         private readonly ILogger<CustomerController> _logger;
 
-        public CustomerController(DbCustomerService dbCustomerService, ILogger<CustomerController> logger)
+        public CustomerController(IDbCustomerService dbCustomerService, ILogger<CustomerController> logger)
         {
             _dbCustomerService = dbCustomerService;
             _logger = logger;

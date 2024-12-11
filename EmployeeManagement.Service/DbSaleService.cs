@@ -142,39 +142,43 @@ namespace EmployeeManagement.Service
                                                .OrderByDescending(ord2 => ord2.TotalQuantity).First());
         }
 
-        public IEnumerable<object> GetProductGroupedBySeason(int top)
+        public Dictionary<string, IEnumerable<object>> GetProductGroupedBySeason(int top)
         {
             if (top <= 0)
             {
                 return DBData.MonthlySales
-                                  .GroupBy(group => Helpers.GetSeason(group.SaleDate))
-                                    .Select(result => new
-                                    {
-                                        Season = result.Key,
-                                        ProductSales = result.GroupBy(group1 => group1.ProductName)
-                                        .Select(newresult => new
-                                        {
-                                            Productname = newresult.Key,
-                                            TotalQuantity = newresult.Sum(quan => quan.QuantitySold)
-                                        })
-                                    });
+                             .GroupBy(group => Helpers.GetSeason(group.SaleDate))
+                             .Select(result => new
+                             {
+                                 Season = result.Key,
+                                 ProductSales = result.GroupBy(group1 => group1.ProductName)
+                                 .Select(newresult => new
+                                 {
+                                     product = newresult.Key,
+                                     sales = newresult.Sum(quan => quan.QuantitySold)
+                                 })
+                                 .Cast<object>()
+                             })
+                             .ToDictionary(x => x.Season, x => x.ProductSales);
             }
             else
             {
                 return DBData.MonthlySales
-                                .GroupBy(group => Helpers.GetSeason(group.SaleDate))
-                                    .Select(result => new
-                                    {
-                                        Season = result.Key,
-                                        ProductSales = result.GroupBy(group1 => group1.ProductName)
-                                        .Select(newresult => new
-                                        {
-                                            Productname = newresult.Key,
-                                            TotalQuantity = newresult.Sum(quan => quan.QuantitySold)
-                                        })
-                                        .OrderByDescending(result => result.TotalQuantity)
-                                        .Take(top)
-                                    });
+                             .GroupBy(group => Helpers.GetSeason(group.SaleDate))
+                             .Select(result => new
+                             {
+                                 Season = result.Key,
+                                 ProductSales = result.GroupBy(group1 => group1.ProductName)
+                                 .Select(newresult => new
+                                 {
+                                     product = newresult.Key,
+                                     sales = newresult.Sum(quan => quan.QuantitySold)
+                                 })
+                                 .OrderByDescending(result => result.sales)
+                                 .Take(top)
+                                 .Cast<object>()
+                             })
+                             .ToDictionary(x => x.Season, x => x.ProductSales);
             }
         }
 

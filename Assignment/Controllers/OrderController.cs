@@ -70,7 +70,7 @@ namespace CCMPreparation.Controllers
             {
                 var result = _orderService.GetTotalNoOfOrderPlacedInLast3Month();
 
-                return Ok($"Total No Of Order Placed In Last 3 Month:{result}");
+                return Ok(result);
                 // return NotFound(new { message = "No data found for customer." });
             }
             catch (Exception ex)
@@ -90,7 +90,7 @@ namespace CCMPreparation.Controllers
             {
                 var rawResult = _orderService.GetTotalNoOfUniqueCustomersPlacedOrderInLast3Month();
 
-                return Ok($"Total No Of Unique Customers Placed Order In Last 3 Month: {rawResult}");
+                return Ok($"Total No Of Unique Customers Placed Order In Last 3 Month: {string.Join(",", rawResult)}");
 
                 // return NotFound(new { message = "No data found for customer." });
             }

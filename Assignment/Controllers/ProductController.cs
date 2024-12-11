@@ -37,9 +37,14 @@ namespace Assignment.Controllers
 
                 var responseResult = await _externalApiService.GetProductsAsync(uri);
 
-                var jsonObject = JsonSerializer.Deserialize<List<ProductExternal>>(responseResult);
+                if (responseResult != null)
+                {
+                    var jsonObject = JsonSerializer.Deserialize<List<ProductExternal>>(responseResult);
 
-                return Ok(jsonObject);
+                    return Ok(jsonObject);
+                };
+
+                return Ok(Enumerable.Empty<ProductExternal>());
             }
             catch (Exception ex)
             {

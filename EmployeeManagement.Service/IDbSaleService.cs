@@ -12,7 +12,7 @@ namespace EmployeeManagement.Service
         object GetMostPopularProductInLast6MonthOfYear(int year);
         object GetMostSoldProductByYear(int year);
         IEnumerable<object> GetMostSoldProductMonthWiseOfYear(int year);
-        IEnumerable<object> GetProductGroupedBySeason(int top);
+        Dictionary<string, IEnumerable<object>> GetProductGroupedBySeason(int top);
         IEnumerable<Sale> GetProductMonthlySales(string ProductName);
         IEnumerable<Sale> GetAllMonthlySales();
 

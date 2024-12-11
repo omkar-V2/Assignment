@@ -1,4 +1,7 @@
-﻿using Common;
+﻿using System.Collections;
+using System.Reflection;
+using System.Text;
+using Common;
 using EmployeeManagement.Data;
 using EmployeeManagement.Service;
 using Microsoft.AspNetCore.Mvc;
@@ -130,7 +133,7 @@ namespace CCMPreparation.Controllers
                 {
                     return BadRequest();
                 }
-                 
+
                 var rawResult = _dbSaleService.GetLeastPopularProductInLast6MonthOfYear(year);
 
                 if (rawResult is not null) { return Ok(new { rawResult }); }
@@ -263,7 +266,7 @@ namespace CCMPreparation.Controllers
 
         // GET /api/<Sale>/year/2023
         [HttpGet("GetProductGroupedBySeason/Top/{top}")]
-        public ActionResult<IEnumerable<object>> GetProductGroupedBySeason(int top)
+        public ActionResult<Dictionary<string, IEnumerable<object>>> GetProductGroupedBySeason(int top)
         {
             _logger.LogInformation("PurchaseController:Method:GetProductGroupedBySeason Called");
 
@@ -272,7 +275,9 @@ namespace CCMPreparation.Controllers
                 var rawResult = _dbSaleService.GetProductGroupedBySeason(top);
 
                 if (rawResult.Any())
+                {
                     return Ok(rawResult);
+                }
 
                 return NotFound("No Data Found");
             }
