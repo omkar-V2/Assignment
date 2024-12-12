@@ -83,7 +83,8 @@ namespace CCMPreparation.Controllers
                 {
                     return Ok(employees);
                 }
-                return NotFound();
+                return Ok(Enumerable.Empty<Employee>());
+                // return NotFound();
             }
             catch (Exception ex)
             {

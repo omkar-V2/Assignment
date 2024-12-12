@@ -6,10 +6,10 @@ namespace EmployeeManagement.Service
     {
         IEnumerable<object> GetAggregateOfEachProductSoldOfYear(int year);
         IEnumerable<object> GetAveargeQuanOfProductSoldMonthWiseOfYear(int year);
-        object GetLeastPopularProductInLast6MonthOfYear(int year);
+        object? GetLeastPopularProductInLast6MonthOfYear(int year);
         object GetLeastSoldProductByYear(int year);
         IEnumerable<object> GetLeastSoldProductMonthWiseOfYear(int year);
-        object GetMostPopularProductInLast6MonthOfYear(int year);
+        object? GetMostPopularProductInLast6MonthOfYear(int year);
         object GetMostSoldProductByYear(int year);
         IEnumerable<object> GetMostSoldProductMonthWiseOfYear(int year);
         Dictionary<string, IEnumerable<object>> GetProductGroupedBySeason(int top);

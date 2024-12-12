@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System;
 using System.Text.Json.Serialization;
 using CCMPreparation.Middleware;
 using EmployeeManagement.Data;
@@ -23,6 +25,13 @@ try
     Log.Information("Application Setup Started....");
 
     // Add services to the container. 
+    builder.Services.AddHttpClient();
+    builder.Services.AddHttpClient<ExternalApiService>(client =>
+    {
+        client.BaseAddress = new Uri("https://fakestoreapi.com/products/");
+        client.DefaultRequestHeaders.Add("Accept", "application/json");
+
+    });
     builder.Services.AddScoped<IEmployeeService, EmployeeService>();
     builder.Services.AddScoped<IDbOrderService, DbOrderService>();
     builder.Services.AddScoped<IDbPurchaseService, DbPurchaseService>();
@@ -30,8 +39,7 @@ try
     builder.Services.AddScoped<IDbSupportTicketService, DbSupportTicketService>();
     builder.Services.AddScoped<IDbCustomerService, DbCustomerService>();
     builder.Services.AddScoped<IDbSaleService, DbSaleService>();
-
-    builder.Services.AddTransient<ExternalApiService>();
+     
     builder.Services.AddSingleton<IEmployeeRepository, EmployeeRepository>();
 
     builder.Services.AddControllers().AddJsonOptions(options =>

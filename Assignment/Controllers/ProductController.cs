@@ -33,16 +33,17 @@ namespace Assignment.Controllers
         {
             try
             {
-                string uri = $"https://fakestoreapi.com/products?limit={limit}";
+                var responseResult = await _externalApiService.GetProductsAsync(limit);
 
-                var responseResult = await _externalApiService.GetProductsAsync(uri);
-
-                if (responseResult != null)
+                if (!string.IsNullOrEmpty(responseResult))
                 {
-                    var jsonObject = JsonSerializer.Deserialize<List<ProductExternal>>(responseResult);
+                    var jsonObject = JsonSerializer.Deserialize<IEnumerable<ProductExternal>>(responseResult);
 
-                    return Ok(jsonObject);
-                };
+                    if (jsonObject?.Any() == true)
+                    {
+                        return Ok(jsonObject);
+                    }
+                }
 
                 return Ok(Enumerable.Empty<ProductExternal>());
             }
@@ -57,8 +58,8 @@ namespace Assignment.Controllers
 
     public class ProductExternal
     {
-        [JsonPropertyName("id")]
-        public int Id { get; set; }
+        //[JsonPropertyName("id")]
+        //public int Id { get; set; }
         [JsonPropertyName("title")]
         public string Title { get; set; }
         [JsonPropertyName("price")]

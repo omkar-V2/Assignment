@@ -43,7 +43,8 @@ namespace Assignment.Controllers
                     return Ok(rawResult);
                 }
 
-                return NotFound(new { message = "No data found for customer." });
+                return Ok(Enumerable.Empty<object>());
+                //return NotFound(new { message = "No data found for customer." });
             }
             catch (Exception ex)
             {
@@ -88,7 +89,9 @@ namespace Assignment.Controllers
                 if (rawResult.Any())
                     return Ok(new { rawResult });
 
-                return NotFound(new { message = "No data found for customer." });
+                return Ok(Enumerable.Empty<object>());
+
+                //return NotFound(new { message = "No data found for customer." });
             }
             catch (Exception ex)
             {
@@ -158,7 +161,8 @@ namespace Assignment.Controllers
                         // message = $"Support Tickets Average Per Month:{result}"
                     });
 
-                return NotFound(new { message = "No data found." });
+                return Ok(Enumerable.Empty<object>());
+                //return NotFound(new { message = "No data found." });
             }
             catch (Exception ex)
             {
@@ -180,7 +184,8 @@ namespace Assignment.Controllers
                 if (rawResult != null)
                     return Ok(new { MonthWithHighestNoOfSupportTickets = rawResult });
 
-                return NotFound(new { message = "No data found." });
+                return Ok(Enumerable.Empty<object>());
+                // return NotFound(new { message = "No data found." });
             }
             catch (Exception ex)
             {

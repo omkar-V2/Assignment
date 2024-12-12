@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Reflection;
 using System.Text;
+using Assignment.Controllers;
 using Common;
 using EmployeeManagement.Data;
 using EmployeeManagement.Service;
@@ -59,7 +60,9 @@ namespace CCMPreparation.Controllers
                     return Ok(new { ProductWithHighQuantityFirst3Month = rawResult });
                 }
 
-                return NotFound(new { message = "no data found for year {year} " });
+                return Ok(Enumerable.Empty<object>());
+
+                //return NotFound(new { message = "no data found for year {year} " });
             }
             catch (Exception ex)
             {
@@ -112,7 +115,8 @@ namespace CCMPreparation.Controllers
 
                 if (rawResult is not null) { return Ok(new { rawResult }); }
 
-                return NotFound(new { message = " no data found for 6 month of year:{year}.", year });
+                return Ok(Enumerable.Empty<object>());
+                //return NotFound(new { message = " no data found for 6 month of year:{year}.", year });
             }
             catch (Exception ex)
             {
@@ -138,7 +142,8 @@ namespace CCMPreparation.Controllers
 
                 if (rawResult is not null) { return Ok(new { rawResult }); }
 
-                return NotFound(new { message = " no data found for 6 month of year:{year}.", year });
+                return Ok(Enumerable.Empty<object>());
+                //  return NotFound(new { message = " no data found for 6 month of year:{year}.", year });
             }
             catch (Exception ex)
             {
@@ -166,8 +171,8 @@ namespace CCMPreparation.Controllers
                 if (rawResult is not null)
                 { return Ok(rawResult); }
 
-
-                return NotFound();
+                return Ok(Enumerable.Empty<object>());
+                //return NotFound();
             }
             catch (Exception ex)
             {
@@ -196,8 +201,8 @@ namespace CCMPreparation.Controllers
                 if (rawResult is not null)
                 { return Ok(rawResult); }
 
-
-                return NotFound();
+                return Ok(Enumerable.Empty<object>());
+                // return NotFound();
             }
             catch (Exception ex)
             {
@@ -215,7 +220,6 @@ namespace CCMPreparation.Controllers
 
             try
             {
-
                 if (year <= 0)
                 {
                     return BadRequest();
@@ -226,14 +230,14 @@ namespace CCMPreparation.Controllers
                 if (rawResult is not null)
                 { return Ok(rawResult); }
 
-                return NotFound();
+                return Ok(Enumerable.Empty<object>());
+                // return NotFound();
             }
             catch (Exception ex)
             {
                 _logger.LogError("PurchaseController:Method:GetTotalProductQuantitySoldByYear: {ex}", ex);
                 return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
-
         }
 
         // GET /api/<Sale>/year/2023
@@ -255,7 +259,8 @@ namespace CCMPreparation.Controllers
                 if (rawResult is not null)
                 { return Ok(rawResult); }
 
-                return NotFound();
+                // return NotFound();
+                return Ok(Enumerable.Empty<object>());
             }
             catch (Exception ex)
             {
@@ -279,7 +284,8 @@ namespace CCMPreparation.Controllers
                     return Ok(rawResult);
                 }
 
-                return NotFound("No Data Found");
+                return Ok(Enumerable.Empty<Dictionary<string, IEnumerable<object>>>());
+                //  return NotFound("No Data Found");
             }
             catch (Exception ex)
             {
@@ -306,7 +312,8 @@ namespace CCMPreparation.Controllers
                 if (rawResult.Any())
                 { return Ok(rawResult); }
 
-                return NotFound();
+                return Ok(Enumerable.Empty<object>());
+                //return NotFound();
             }
             catch (Exception ex)
             {
@@ -334,7 +341,8 @@ namespace CCMPreparation.Controllers
                 if (rawResult is not null)
                 { return Ok(rawResult); }
 
-                return NotFound();
+                return Ok(Enumerable.Empty<object>());
+                // return NotFound();
             }
             catch (Exception ex)
             {
@@ -362,7 +370,8 @@ namespace CCMPreparation.Controllers
                 if (rawResult.Any())
                 { return Ok(rawResult); }
 
-                return NotFound();
+                return Ok(Enumerable.Empty<object>());
+                // return NotFound();
             }
             catch (Exception ex)
             {

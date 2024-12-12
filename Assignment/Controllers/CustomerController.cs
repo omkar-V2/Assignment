@@ -43,7 +43,8 @@ namespace CCMPreparation.Controllers
                     return Ok(rawResult);
                 }
 
-                return NotFound(new { message = "No data found for customer." });
+                return Ok(Enumerable.Empty<object>());
+                //return NotFound(new { message = "No data found for customer." });
             }
             catch (Exception ex)
             {
@@ -66,7 +67,8 @@ namespace CCMPreparation.Controllers
                     return Ok(new { rawResult });
                 }
 
-                return NotFound(new { message = "No data found for customer." });
+                return Ok(Enumerable.Empty<object>());
+                //return NotFound(new { message = "No data found for customer." });
             }
             catch (Exception ex)
             {
@@ -90,7 +92,8 @@ namespace CCMPreparation.Controllers
                     return Ok(rawResult);
                 }
 
-                return NotFound(new { message = "No data found for customer." });
+                return Ok(Enumerable.Empty<object>());
+                //return NotFound(new { message = "No data found for customer." });
             }
             catch (Exception ex)
             {
@@ -112,8 +115,8 @@ namespace CCMPreparation.Controllers
                 {
                     return Ok(rawResult);
                 }
-
-                return NotFound(new { message = "No data found for customer." });
+                return Ok(Enumerable.Empty<object>());
+                //return NotFound(new { message = "No data found for customer." });
             }
             catch (Exception ex)
             {
@@ -136,7 +139,8 @@ namespace CCMPreparation.Controllers
                     return Ok(rawResult);
                 }
 
-                return NotFound(new { message = "No data found for customer." });
+                return Ok(Enumerable.Empty<object>());
+                //return NotFound(new { message = "No data found for customer." });
             }
             catch (Exception ex)
             {
@@ -160,8 +164,8 @@ namespace CCMPreparation.Controllers
                 {
                     return Ok(rawResult);
                 }
-
-                return NotFound(new { message = "No data found for customer." });
+                return Ok(Enumerable.Empty<object>());
+                //return NotFound(new { message = "No data found for customer." });
             }
             catch (Exception ex)
             {

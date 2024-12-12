@@ -246,7 +246,5 @@ namespace EmployeeManagement.Service
                    .Select(result => result
                   .OrderBy(ord2 => ord2.TotalQuantity).First());
         }
-
-
     }
 }
