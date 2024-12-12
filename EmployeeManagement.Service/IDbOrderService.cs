@@ -12,6 +12,7 @@ namespace EmployeeManagement.Service
         IEnumerable<Order> GetOrderByOrderNo(string orderNo);
         IEnumerable<object> GetOrderCountPerMonthByYear(int year);
         IEnumerable<object> GetTotalNoOfOrderPlacedInLast3Month();
+        IEnumerable<object> GetTotalNoOfOrderPlacedPerMonthInLast3Month();
         IEnumerable<object> GetTotalNoOfUniqueCustomersPlacedOrderInLast3Month();
     }
 }

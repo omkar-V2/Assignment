@@ -97,8 +97,8 @@ namespace Assignment.Controllers
                     {
                         rawResult
                     });
-
-                return NotFound(new { message = "No data found." });
+                return Ok(Enumerable.Empty<object>());
+                //return NotFound(new { message = "No data found." });
             }
             catch (Exception ex)
             {

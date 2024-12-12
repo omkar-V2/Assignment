@@ -320,13 +320,13 @@ namespace EmployeeManagement.Data
         new SupportTicket("Customer Service", new DateTime(2023, 03, 01)),
 
         // April 2023 
-        new SupportTicket("Delivery Delays", new DateTime(2023, 04, 01)),
-        new SupportTicket("Customer Delays", new DateTime(2023, 04, 01)),
-        new SupportTicket("Customer Delays", new DateTime(2023, 04, 01)),
-        new SupportTicket("Product Quality", new DateTime(2023, 04, 01)),
-        new SupportTicket("Product Quality", new DateTime(2023, 04, 01)),
-        new SupportTicket("Payment Issues", new DateTime(2023, 04, 01)),
-        new SupportTicket("Customer Service", new DateTime(2023, 04, 01))
+        //new SupportTicket("Delivery Delays", new DateTime(2023, 04, 01)),
+        //new SupportTicket("Customer Delays", new DateTime(2023, 04, 01)),
+        //new SupportTicket("Customer Delays", new DateTime(2023, 04, 01)),
+        //new SupportTicket("Product Quality", new DateTime(2023, 04, 01)),
+        //new SupportTicket("Product Quality", new DateTime(2023, 04, 01)),
+        //new SupportTicket("Payment Issues", new DateTime(2023, 04, 01)),
+        //new SupportTicket("Customer Service", new DateTime(2023, 04, 01))
         ];
 
         public static readonly List<CustomerActivity> CustomerActivities = new()

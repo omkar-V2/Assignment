@@ -95,15 +95,11 @@ namespace EmployeeManagement.Service
         {
             int itemCount = supp.Count();
 
+            if (itemCount > 10)
+                return true; 
 
-            if (itemCount > 70)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return false;
+
 
             //if (itemCount <= 10)
             //{

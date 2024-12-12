@@ -40,19 +40,14 @@ namespace EmployeeManagement.Service
                 .SelectMany(prod => prod.Products, (ord, prod) => new
                 {
                     productId = prod.ProductID,
-                    productName = prod.Title,
-                    OrderMonth = ord.OrderDateTime.ToString("MMMM")
+                    productName = prod.Title
                 })
                 .GroupBy(group => new { group.productId, group.productName })
                 .Select(sel => new
                 {
                     sel.Key.productId,
                     sel.Key.productName,
-                    monthlyOrders = sel.GroupBy(x => new { x.OrderMonth })
-                                       .ToDictionary(
-                                         x => $"{x.Key.OrderMonth}",
-                                         x => x.Count()
-                                        )
+                    totalOrderCount = sel.Count()
                 });
         }
 
@@ -91,25 +86,46 @@ namespace EmployeeManagement.Service
                          .Where(ord => ord.OrderDateTime.Year == year)
                          .SelectMany(product => product.Products, (ord, product) => new
                          {
-                             orderyear = ord.OrderDateTime.Year,
-                             ordermonth = ord.OrderDateTime.Month,
-                             orderno = ord.OrderNo,
-                             product = product.Title
+                             ordermonth = ord.OrderDateTime.ToString("MMMM"),
+                             productId = product.ProductID,
+                             productName = product.Title,
                          })
-                         .GroupBy(group1 => new
+                        .GroupBy(group => new { group.productId, group.productName })
+                         .Select(sel => new
                          {
-                             group1.orderyear,
-                             group1.ordermonth
-                         })
-                         .Select(result => new
-                         {
-                             year = result.Key.orderyear,
-                             month = result.Key.ordermonth,
-                             product = result.GroupBy(prd => prd.product)
-                                      .Select(ord => new { Title = ord.Key, ProdCount = ord.Count() }),
-                             totalproductcount = result.Count()
-                         })
-                        .OrderBy(ord => ord.month);
+                             sel.Key.productId,
+                             sel.Key.productName,
+                             monthlyOrders = sel.GroupBy(x => new { x.ordermonth })
+                                       .ToDictionary(
+                                         x => $"{x.Key.ordermonth}",
+                                         x => x.Count()
+                                        )
+                         });
+        }
+
+        public IEnumerable<object> GetTotalNoOfOrderPlacedPerMonthInLast3Month()
+        {
+            var fromDate = DateTime.Now.AddMonths(-3);
+
+            return DBData.Orders
+                .Where(get => get.OrderDateTime > fromDate)
+                .SelectMany(prod => prod.Products, (ord, prod) => new
+                {
+                    productId = prod.ProductID,
+                    productName = prod.Title,
+                    OrderMonth = ord.OrderDateTime.ToString("MMMM")
+                })
+                .GroupBy(group => new { group.productId, group.productName })
+                .Select(sel => new
+                {
+                    sel.Key.productId,
+                    sel.Key.productName,
+                    monthlyOrders = sel.GroupBy(x => new { x.OrderMonth })
+                                       .ToDictionary(
+                                         x => $"{x.Key.OrderMonth}",
+                                         x => x.Count()
+                                        )
+                });
         }
 
     }

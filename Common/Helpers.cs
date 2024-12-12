@@ -23,18 +23,11 @@
             var count = cus.Count();
 
             if (count / 2 != 0 && count % 2 == 0) //even
-            {
-                return ((cus.ElementAt((count / 2) - 1)) +
-                         (cus.ElementAt(count / 2))) / 2;
-            }
-            else if (count / 2 != 0 && count % 2 != 0) //odd
-            {
+                return ((cus.ElementAt((count / 2) - 1)) + (cus.ElementAt(count / 2))) / 2;
+            else if (count / 2 != 0 && count % 2 != 0) //odd 
                 return (cus.OrderBy(ord => ord).ElementAt((count / 2)));
-            }
-            else // for one element
-            {
+            else // for one element 
                 return cus.ElementAt(0);
-            }
         }
 
         public static string GetSeason(DateTime date)

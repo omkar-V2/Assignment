@@ -149,5 +149,25 @@ namespace CCMPreparation.Controllers
             }
         }
 
+        // GET /api/Order/GetTotalNoOfOrderPlacedInLast3Month/2023
+        [HttpGet("GetTotalNoOfOrderPlacedPerMonthInLast3Month")]
+        public ActionResult<IEnumerable<object>> GetTotalNoOfOrderPlacedPerMonthInLast3Month()
+        {
+            _logger.LogInformation("OrderController:Method:GetTotalNoOfOrderPlacedInLast3Month called.");
+            try
+            {
+                var result = _orderService.GetTotalNoOfOrderPlacedPerMonthInLast3Month();
+
+                return Ok(result);
+                // return NotFound(new { message = "No data found for customer." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("OrderController:Method:GetTotalNoOfOrderPlacedInLast3Month Error: {ex}", ex);
+
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
+            }
+        }
+
     }
 }

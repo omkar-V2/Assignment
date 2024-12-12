@@ -62,7 +62,7 @@ namespace EmployeeManagement.Service
                    .Select(result => new
                    {
                        customer = result.Key.CustomerId,
-                       loyaltytier = GetLoyaltyTier(result)
+                       loyaltyTier = GetLoyaltyTier(result)
                    });
         }
 
@@ -101,26 +101,14 @@ namespace EmployeeManagement.Service
             //#           - Silver (1 to 5 purchases per year).
 
             int itemCount = loyalty.Count();
-            if (itemCount < 12)
-            {
-                if (itemCount < 6)
-                {
-                    return "Silver";
-                }
-                else if (itemCount <= 0)
-                {
-                    return "None";
-                }
-                else
-                {
-                    return "Gold";
-                }
-            }
-            else
-            {
+            if (itemCount >= 12)
                 return "Platinum";
-            }
-
+            else if (itemCount >= 6)
+                return "Gold";
+            else if (itemCount >= 1)
+                return "Silver";
+            else
+                return "None";
         }
 
     }
