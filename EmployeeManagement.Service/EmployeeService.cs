@@ -43,5 +43,27 @@ namespace EmployeeManagement.Service
         {
             return _employeeRepository.SearchEmployee(id);
         }
+
+
+        public decimal GetAverageSalaryOfDepartment(string departmentName)
+        {
+            return _employeeRepository.GetAverageSalaryOfDepartment(departmentName);
+        }
+
+        public IEnumerable<object> GetAllLocationsOfDepartment(string departmentName)
+        {
+            return _employeeRepository.GetAllLocationsOfDepartment(departmentName);
+        }
+
+        public IEnumerable<object> GetEmployeeCountOfAllDepartment()
+        {
+            return _employeeRepository.GetEmployeeCountOfAllDepartment();
+        }
+
+        public IEnumerable<object> GetRecent5Employees()
+        {
+            return _employeeRepository.GetRecent5Employees();
+        }
+
     }
 }

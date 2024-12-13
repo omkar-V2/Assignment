@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
+using EmployeeManagement.Data;
 
 namespace EmployeeManagement.Service
 {
@@ -10,11 +12,18 @@ namespace EmployeeManagement.Service
     {
         private bool disposedValue;
 
-        public async Task<string> GetProductsAsync(string limit)
+        public async Task<IEnumerable<ProductExternal>> GetProductsAsync(string limit)
         {
             var response = await httpClient.GetAsync($"?limit={limit}");
+
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadAsStringAsync();
+
+            var responseResult = await response.Content.ReadAsStringAsync();
+
+            var jsonObject = JsonSerializer.Deserialize<IEnumerable<ProductExternal>>(responseResult);
+
+            return jsonObject;
+
         }
 
         protected virtual void Dispose(bool disposing)

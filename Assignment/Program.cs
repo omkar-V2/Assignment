@@ -26,20 +26,28 @@ try
 
     // Add services to the container. 
     builder.Services.AddHttpClient();
+
     builder.Services.AddHttpClient<ExternalApiService>(client =>
     {
         client.BaseAddress = new Uri("https://fakestoreapi.com/products/");
         client.DefaultRequestHeaders.Add("Accept", "application/json");
 
     });
+
+    builder.Services.AddHttpClient<IProductService, ProductService>(client =>
+    {
+        client.BaseAddress = new Uri("https://fakestoreapi.com/products/category/");
+        client.DefaultRequestHeaders.Add("Accept", "application/json");
+    });
+
     builder.Services.AddScoped<IEmployeeService, EmployeeService>();
     builder.Services.AddScoped<IDbOrderService, DbOrderService>();
     builder.Services.AddScoped<IDbPurchaseService, DbPurchaseService>();
     builder.Services.AddScoped<IDbInquiryService, DbInquiryService>();
     builder.Services.AddScoped<IDbSupportTicketService, DbSupportTicketService>();
     builder.Services.AddScoped<IDbCustomerService, DbCustomerService>();
-    builder.Services.AddScoped<IDbSaleService, DbSaleService>();
-     
+    builder.Services.AddScoped<IDbSaleService, DbSaleService>(); 
+
     builder.Services.AddSingleton<IEmployeeRepository, EmployeeRepository>();
 
     builder.Services.AddControllers().AddJsonOptions(options =>

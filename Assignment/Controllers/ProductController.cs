@@ -12,11 +12,13 @@ namespace Assignment.Controllers
     [ApiController]
     public class ProductController : ControllerBase
     {
-        public readonly ExternalApiService _externalApiService;
-        public readonly ILogger<ProductController> _logger;
-        public ProductController(ILogger<ProductController> logger, ExternalApiService externalApiService)
+        private readonly IProductService _productService;
+        private readonly ExternalApiService _externalApiService;
+        private readonly ILogger<ProductController> _logger;
+        public ProductController(ILogger<ProductController> logger, IProductService productService, ExternalApiService externalApiService)
         {
             _logger = logger;
+            _productService = productService;
             _externalApiService = externalApiService;
         }
 
@@ -29,20 +31,15 @@ namespace Assignment.Controllers
 
         // GET: api/<ProductController>/partner/1
         [HttpGet("partner/{limit}")]
-        public async Task<ActionResult<List<ProductExternal>>> GetProductsAsync(string limit)
+        public async Task<ActionResult<IEnumerable<ProductExternal>>> GetProductsAsync(string limit)
         {
             try
             {
-                var responseResult = await _externalApiService.GetProductsAsync(limit);
+                var result = await _externalApiService.GetProductsAsync(limit);
 
-                if (!string.IsNullOrEmpty(responseResult))
+                if (result?.Any() == true)
                 {
-                    var jsonObject = JsonSerializer.Deserialize<IEnumerable<ProductExternal>>(responseResult);
-
-                    if (jsonObject?.Any() == true)
-                    {
-                        return Ok(jsonObject);
-                    }
+                    return Ok(result);
                 }
 
                 return Ok(Enumerable.Empty<ProductExternal>());
@@ -53,21 +50,29 @@ namespace Assignment.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
+
+        // GET: api/<ProductController>/category/jewelery
+        [HttpGet("category/{category}")]
+        public async Task<ActionResult<IEnumerable<ProductCategoryExternal>>> GetProductsByCategoryAsync(string category)
+        {
+            try
+            {
+                var result = await _productService.GetProductsByCategoryAsync(category);
+
+                if (result?.Any() == true)
+                {
+                    return Ok(result);
+                }
+
+                return Ok(Enumerable.Empty<ProductCategoryExternal>());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("ProductController:GetProductsAsync Error:{ex}", ex);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
+            }
+        }
     }
 
-
-    public class ProductExternal
-    {
-        //[JsonPropertyName("id")]
-        //public int Id { get; set; }
-        [JsonPropertyName("title")]
-        public string Title { get; set; }
-        [JsonPropertyName("price")]
-        public decimal Price { get; set; }
-        [JsonPropertyName("description")]
-        public string Description { get; set; }
-
-        // Add other properties as needed
-    }
 
 }

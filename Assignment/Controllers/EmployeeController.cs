@@ -170,8 +170,87 @@ namespace CCMPreparation.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError("EmployeeController:Delete Error:{ex}", ex);
+
                 return StatusCode(StatusCodes.Status500InternalServerError, ex);
             }
         }
+
+        //GET api/<EmployeeController>/GetAverageSalaryOfDepartment
+        [HttpGet("GetAverageSalaryOfdepartment")]
+        public IActionResult GetAverageSalaryOfDepartment(string departmentName)
+        {
+            _logger.LogInformation("EmployeeController GetAverageSalaryOfDepartment Method Called");
+            try
+            {
+                var averageSalary = _employeeService.GetAverageSalaryOfDepartment(departmentName);
+
+                return Ok($"Department: {departmentName} Average Salary: {averageSalary.ToString("F2")}");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("EmployeeController:GetAverageSalaryOfDepartment Error:{ex}", ex);
+
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
+            }
+        }
+
+        //GET api/<EmployeeController>/GetEmployeeCountOfAllDepartment
+        [HttpGet("GetEmployeeCountOfAllDepartment")]
+        public IActionResult GetEmployeeCountOfAllDepartment()
+        {
+            _logger.LogInformation("EmployeeController GetEmployeeCountOfAllDepartment Method Called");
+            try
+            {
+                var result = _employeeService.GetEmployeeCountOfAllDepartment();
+
+                return Ok(result.Any() ? result : Enumerable.Empty<object>());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("EmployeeController:GetEmployeeCountOfAllDepartment Error:{ex}", ex);
+
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
+            }
+        }
+
+        //GET api/<EmployeeController>/GetAverageSalaryOfDepartment
+        [HttpGet("GetRecent5Employees")]
+        public IActionResult GetRecent5Employees()
+        {
+            _logger.LogInformation("EmployeeController GetRecent5Employees Method Called");
+            try
+            {
+                var result = _employeeService.GetRecent5Employees();
+
+                return Ok(result.Any() ? result : Enumerable.Empty<object>());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("EmployeeController:GetRecent5Employees Error:{ex}", ex);
+
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
+            }
+        }
+
+        //GET api/<EmployeeController>/GetAllLocationsOfDepartment
+        [HttpGet("GetAllLocationsOfDepartment/{departmentName}")]
+        public IActionResult GetAllLocationsOfDepartment(string departmentName)
+        {
+            _logger.LogInformation("EmployeeController GetAllLocationsOfDepartment Method Called");
+            try
+            {
+                var result = _employeeService.GetAllLocationsOfDepartment(departmentName);
+
+                return Ok(result.Any() ? result : Enumerable.Empty<object>());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("EmployeeController:GetAllLocationsOfDepartment Error:{ex}", ex);
+
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
+            }
+        }
+
     }
 }
