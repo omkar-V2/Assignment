@@ -8,6 +8,7 @@ namespace EmployeeManagement.Service
         IEnumerable<object> GetLast3MonthsCustomerPurchaseInfo(string customerId);
         object GetMostActiveCustomerInLast3Month();
         IEnumerable<object> GetPurchaseAndOrderInfo(string customerId);
+        object GetSortedArrayWithMinSwap(string arrayOfBinaryDigits);
         IEnumerable<object> GetUniqueCustomerInteractedInLast3Month();
     }
 }

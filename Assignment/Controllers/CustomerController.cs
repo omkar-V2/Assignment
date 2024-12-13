@@ -174,5 +174,34 @@ namespace CCMPreparation.Controllers
             }
         }
 
+        //Get: api/Customer/GetMostActiveCustomerInLast3Month
+        [HttpGet("GetSortedArrayWithMinSwap")]
+        public ActionResult<object> GetSortedArrayWithMinSwap(string arrayOfBinaryDigits)
+        {
+            _logger.LogInformation("CustomerController:Method:GetSortedArrayWithMinSwap called.");
+            try
+            {
+                if (arrayOfBinaryDigits == null)
+                {
+                    return BadRequest("Incorrect data.");
+                }
+                var fromDatePurchase = DateTime.Now.AddMonths(-3);
+
+                var rawResult = _dbCustomerService.GetSortedArrayWithMinSwap(arrayOfBinaryDigits);
+
+                if (rawResult is not null)
+                {
+                    return Ok(rawResult);
+                }
+                return Ok(Enumerable.Empty<object>());
+                //return NotFound(new { message = "No data found for customer." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("CustomerController:Method:GetSortedArrayWithMinSwap Error: {ex}", ex);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex);
+            }
+        }
+
     }
 }

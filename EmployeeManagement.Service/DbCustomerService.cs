@@ -1,4 +1,5 @@
-﻿using EmployeeManagement.Data;
+﻿using System.Text;
+using EmployeeManagement.Data;
 
 namespace EmployeeManagement.Service
 {
@@ -109,6 +110,58 @@ namespace EmployeeManagement.Service
                 return "Silver";
             else
                 return "None";
+        }
+
+        public object GetSortedArrayWithMinSwap(string arrayOfBinaryDigits)
+        {
+            var splitResult = arrayOfBinaryDigits.Split(',');
+
+            var countZeros = splitResult.Count(binDig => binDig == "0");
+            var countOnes = splitResult.Count(binDig => binDig == "1");
+
+            int swapsToRight = 0;
+            int onesSeen = 0;
+
+            int swapsToLeft = 0;
+            int zeroseen = 0;
+
+            foreach (var item in splitResult)
+            {
+                if (item.Trim() == "0")
+                    zeroseen++;
+                else
+                    swapsToLeft += zeroseen;
+            }
+
+            foreach (var item in splitResult)
+            {
+                if (item.Trim() == "1")
+                    onesSeen++;
+                else
+                    swapsToRight += onesSeen;
+            }
+
+
+
+
+            var strbuildZeroObj = new StringBuilder();
+            var strbuildOneObj = new StringBuilder();
+
+
+            foreach (var item in splitResult)
+            {
+                if (item.Trim() == "0")
+                    strbuildZeroObj.Append(item + ",");
+                else
+                    strbuildOneObj.Append(item + ",");
+            }
+
+            return new
+            {
+                sortedArry = (strbuildZeroObj.ToString() + strbuildOneObj.ToString()),
+                zeroSwap = swapsToLeft,
+                oneSwap = swapsToRight
+            };
         }
 
     }
