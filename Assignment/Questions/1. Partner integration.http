@@ -1,0 +1,39 @@
+# Story: Partner Integration Endpoint Development
+#
+# As a backend developer, integrate with our partner's API to fetch and display a wider
+# range of products to our customers.
+#
+# Acceptance Criteria:
+# 1. API Call Execution: -Controller -Done
+#    - Make an HTTP GET request to 'https://fakestoreapi.com/products?limit={limit}'.
+#
+# 2. Data Extraction:
+#    - Extract 'title', 'price', and 'description' from each product. -DONE
+#
+# 4. Data Presentation:
+#    - Return the processed data as JSON from GET /products/partner.
+#
+# 5. Performance and Scalability:
+#    - Take advantage of the limit parameter to reduce loan on the server.
+#
+# 6. Parameterization:
+#    - Accept limit as parameter and pass it on to the partner api endpoint
+#
+# Example API Request:
+GET http://localhost:5141/products/partner?limit=5
+
+# Expected JSON Output:
+#[
+#  {
+#    "title": "Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops",
+#    "price": 109.95,
+#    "description": "Your perfect pack for everyday use and walks in the forest. Stash your laptop (up to 15 inches) in the padded sleeve, your everyday"
+#  },
+#  {
+#    "title": "Mens Casual Premium Slim Fit T-Shirts ",
+#    "price": 22.3,
+#    "description": "Slim-fitting style, contrast raglan long sleeve, three-button henley placket, light weight & soft fabric for breathable and comfortable wearing. And Solid stitched shirts with round neck made for durability and a great fit for casual fashion wear and diehard baseball fans. The Henley style round neckline includes a three-button placket."
+#  },
+#   // More products...
+#]
+# Note: Ensure efficient handling of large data sets and structured data for frontend.

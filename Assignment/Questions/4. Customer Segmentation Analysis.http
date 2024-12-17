@@ -1,0 +1,39 @@
+# Story: Customer Loyalty Analysis
+#
+# As a data analyst, categorize customers based on their purchasing frequency over the last year to enhance customer retention strategies.
+#
+# Acceptance Criteria:
+# 1. Data Access:
+#    - Fetch customer purchase frequency data from ECommerceApplication.Data.Db.CustomerActivities.
+#
+# 2. Segmentation Logic:
+#    - Segment customers based on their purchase frequency into three loyalty tiers:
+#      - Platinum (12 or more purchases per year)
+#      - Gold (6 to 11 purchases per year)
+#      - Silver (1 to 5 purchases per year).
+#
+# 3. Return Data:
+#    - Return a list showing each customer's loyalty tier.
+#
+# Example API Request:
+GET http://localhost:5141/customers/loyalty
+
+# Expected JSON Output:
+# [
+#   {
+#     "customerId": "C001",
+#     "loyaltyTier": "Gold"
+#   },
+#   {
+#     "customerId": "C002",
+#     "loyaltyTier": "Platinum"
+#   },
+#   {
+#     "customerId": "C003",
+#     "loyaltyTier": "Silver"
+#   },
+#   {
+#     "customerId": "C004",
+#     "loyaltyTier": "Silver"
+#   }
+# ]

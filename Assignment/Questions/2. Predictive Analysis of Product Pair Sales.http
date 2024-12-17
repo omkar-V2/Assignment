@@ -1,0 +1,48 @@
+# Story: Trend Analysis of Seasonal Product Sales
+#
+# As a business analyst, aid the marketing team by determining the top-selling products in each season to optimize promotional strategies.
+#
+# Acceptance Criteria:
+# 1. Data Access:
+#    - Retrieve product sales data (ECommerceApplication.Data.Db.MonthlySales), noting the sales data includes timestamps.
+#
+# 2. Algorithm Focus:
+#    - Calculate total sales for each product grouped by season (Spring, Summer, Autumn, Winter).
+#      - Spring: March, April, May
+#      - Summer: June, July, August
+#      - Autumn: September, October, November
+#      - Winter: December, January, February
+#    - Ensure high efficiency in time and space complexity due to large data volumes.
+#
+# 3. Return Data:
+#    - Return a list of the top N products by sales volume for each season.
+#
+# 4. Parameterization:
+#    - Accept an integer N to specify how many top products to return for each season.
+#
+# Example API Request:
+GET http://localhost:5141/products/seasonal-tops?topN=3
+
+# Expected JSON Output:
+# {
+#   "Winter": [
+#     { "product": "Laptop", "sales": 135 },
+#     { "product": "Smartphone", "sales": 100 },
+#     { "product": "Tablet", "sales": 55 }
+#   ],
+#   "Spring": [
+#     { "product": "Laptop", "sales": 210 },
+#     { "product": "Smartphone", "sales": 180 },
+#     { "product": "Tablet", "sales": 120 }
+#   ],
+#   "Summer": [
+#     { "product": "Laptop", "sales": 270 },
+#     { "product": "Smartphone", "sales": 220 },
+#     { "product": "Tablet", "sales": 165 }
+#   ],
+#   "Autumn": [
+#     { "product": "Laptop", "sales": 100 },
+#     { "product": "Smartphone", "sales": 85 },
+#     { "product": "Tablet", "sales": 65 }
+#   ]
+# }

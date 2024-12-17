@@ -1,0 +1,28 @@
+# Story: Seasonal Product Order Analysis
+#
+# As a data analyst, develop a method to analyze the order frequency of products by month to identify seasonal
+# trends in customer purchasing behavior, aiding in strategic planning for inventory and promotions.
+#
+# Acceptance Criteria:
+# 1. Data Access:
+#    - Fetch order data from ECommerceApplication.Data.Db.Orders for a specified year.
+#
+# 2. Data Processing:
+#    - Aggregate all orders by product and month, counting the number of times each product is ordered.
+#
+# 3. Return Data:
+#    - Return a list of products with their order counts for each month of the specified year.
+#
+# 4. Parameterization:
+#    - Ensure the API accepts a year parameter to focus the data retrieval.
+#
+# Example API Request:
+GET http://localhost:5141/products/seasonal-trends?year=2023
+
+# Expected JSON Output:
+# [
+#   { "productId": "P001", "productName": "Laptop", "monthlyOrders": { "January": 20, "February": 15, "March": 25 } },
+#   { "productId": "P002", "productName": "Smartphone", "monthlyOrders": { "April": 30, "May": 35, "June": 28 } },
+#   { "productId": "P003", "productName": "Blouse", "monthlyOrders": { "July": 45, "August": 40, "September": 50 } },
+#   { "productId": "P004", "productName": "Jeans", "monthlyOrders": { "October": 60, "November": 55, "December": 65 } }
+# ]
